@@ -1,0 +1,11 @@
+<p>Welcome to CaerusGeo, <%= @resource.email %>!</p>
+
+<p>You can confirm your account email through the link below:</p>
+
+<p><%= link_to 'Confirm my account', confirmation_url(@resource, :confirmation_token => @resource.confirmation_token) %></p>
+
+<p>If you experience any problems, please email support@caerusgeo.com.</p>
+
+<p>Thanks,</p>
+<p>The CaerusGeo Team</p>
+

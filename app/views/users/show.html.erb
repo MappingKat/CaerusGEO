@@ -1,0 +1,62 @@
+<% content_for :title do %><%= @user.name %><% end %>
+
+<% content_for :userbar do %>
+	<div class="span6" style="margin-left:0px;">
+		<h2 style="font-size:24px;font-weight:bold" class="top_header"><%= @user.name %></h2>
+		<p style="color:gray">Member since <%= @user.confirmed_at.strftime('%Y-%m-%d') %></p>
+	</div>
+	<div class="span6">
+		<% if current_user.published_surveys.exists? %>
+		<div class="span3" style="margin-left: 0px;margin-right:20px;">
+			<h2 style="position: relative;top: 3px;" class="top_header"><%= current_user.last_sign_in_at.strftime("%m/%d/%Y") %></h2>
+			<p class="lower_header">Last visit</p>
+		</div>
+		<div class="span2" style="margin-left: 0px;">
+			<h2 style="position: relative;top: 3px;" class="top_header"><%= current_user.published_surveys.count %></h2>
+			<p class="lower_header">Surveys</p>
+		</div>
+		<% else %>
+		<p style="text-align:right;position:relative;top:25px;">You don't have any surveys yet. Use the "New Survey" button to create one.</p>
+		<% end %>
+
+	</div>
+<% end %>
+
+<style>
+#white_strip .container {padding-bottom: 26px;}
+</style>
+
+<div id="user_index">
+	<ul class="thumbnails">
+	<% if current_user.published_surveys.exists? %>
+		<% current_user.published_surveys.order('surveys.updated_at DESC').includes(:area).each do |survey| %>
+			<li class="span3">
+				<a href="<%= url_for survey_path(survey) %>">
+			    	<div class="thumbnail" style="background-image: url('<%= survey.area.thumbnail %>')">
+			    		<div class="copy">
+			      			<h3><%= truncate(survey.title, :length => 23) %></h3>
+			      			<% last_call = survey.last_updated_by %>
+			      			<p class="updated_status">Updated <%= time_ago_in_words(survey.updated_at) %> ago
+			      				<% if last_call != nil and last_call!=current_user %>
+			      				by <%= truncate(last_call.name,:length =>7) %>
+			      				<% end %>
+			      			</p>
+			    		</div>
+			    	</div>
+				</a>
+			</li>
+		<% end %>
+	<% else %>
+			<li class="span3">
+			    	<div class="thumbnail" style="background:silver;text-align: center;">
+			    		<a class="btn btn-large" href="<%= new_survey_path %>" style="text-decoration: none !important;position:relative;top: 91px;"><i class="icon-plus" style="position: relative;top: 2px;"></i> New Survey</a>
+			    	</div>
+			</li>
+			<% 3.times do |s| %>
+				<li class="span3">
+			    	<div class="thumbnail" style="background:white;text-align: center;"></div>
+				</li>
+			<% end %>
+	<% end %>
+	</ul>
+</div>

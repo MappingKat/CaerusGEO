@@ -1,0 +1,79 @@
+<%= render :partial => "partials/survey_finished_questions", :locals => {:open => true} %>
+<% map_form = @report.survey.actual_questions.first.form %>
+<% content_for :current_page_class do %>report_edit_upload report_edit<% end %>
+
+<script id="loc_template" type="text/x-underscore-tmpl">
+    <@ _.each(points,function(point) { @>
+      <div class="input-prepend" style="margin-bottom:18px;">
+          <span class="add-on">lat</span>
+          <input class="input-small" type="text" value="<@= point.lat @>">
+          <span class="add-on">lng</span>
+          <input class="input-small" type="text" value="<@= point.lng @>">
+      </div>
+    <@ }) @>
+</script>
+
+<div class="row">
+  	<div class="span4">
+      <label class="question_label">Choose Entry ID</label>
+      <select id="e1" style="width:200px;">
+        <option></option>
+        <% @report.spresults.order(:id).each do |spresult| %>
+          <option value="<%= spresult.id %>"><%= spresult.status ? '<i class="icon-ok"></i>' : '<i class="icon-remove"></i> ' %> <%= spresult.uid %></option>
+        <% end %>
+      </select>
+
+      <label class="question_label" style="margin-top:16px;">Location</label>
+
+      <p id="instructions" style="">NO LOCATION</p>
+
+      <p id="pending"></p>
+
+      <p id="ready"></p>
+
+      <div id="location_data"></div>
+
+      <div id="questions_div">
+        <ul id="questions"></ul>
+      </div>
+	</div>
+
+  <div class="span8">
+     <div id="map"></div>
+  </div>
+</div>
+
+
+<script>
+
+  <% if @report.survey.types_used.include?('datetime') %>
+  window.tz_abbr = "<%= ActiveSupport::TimeZone.zones_map[@survey.time_zone].now.strftime('%Z') %>";
+  <% end %>
+
+  Spresult = EntryServices.InitUploadedSpresult("<%= url_for survey_report_spresults_path(@report.survey,@report) %>");
+
+  var SpresultCollection = Backbone.Collection.extend({
+      model: Spresult
+  });
+
+  Spresults = new SpresultCollection();
+  Spresults.url = '<%= url_for survey_report_spresults_path(@report.survey,@report) %>';
+
+  window.area = <%= raw @report.survey.area.bounds.to_json %>;
+  window.grids = <%= raw @report.survey.area.grids.includes(:ne,:sw).to_json %>;
+  window.full_count = <%= @report.spresults.count %>;
+  window.dirty = false;
+  window.map_form = "<%= map_form %>";
+
+  var Question_mod = EntryServices.InitUploadedModel();
+  var QuestionCollection_mod = Backbone.Collection.extend({
+        model: Question_mod
+  });
+
+  var questions = new QuestionCollection_mod(<%= raw @report.survey.actual_questions.to_json %>);
+
+  $(document).ready(function() {
+    EntryServices.InitUploadedEntryTool("<%= url_for survey_analyze_path(@report.survey) %>");
+  });
+
+</script>

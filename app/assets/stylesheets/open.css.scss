@@ -1,0 +1,88 @@
+.wizard #tips {color:#888888 !important;}
+.wizard #tips p {font-size:12px !important;}
+.wizard #tips .tip_title {font-weight:bold;font-size:13px !important}
+.open_add_questions {
+	#tips div {clear:both;}
+	#tips span {font-weight:bold}
+}
+
+.open_info {
+	.row {min-height: 520px;}
+}
+
+.open_type {
+	.type_img {width:143px;height:99px;background-position: bottom;margin-right: auto;margin-left: auto;margin-bottom:10px;}
+	#points  {background-position:bottom left}
+	#areas  {background-position:bottom center}
+	#lines  {background-position: bottom right;}
+	.active {background-color:#F0efef;}
+	.active #points  {background-position:top left}
+	.active #areas  {background-position:top center}
+	.active #lines  {background-position: top right;}
+	label {font-size:16px;font-weight: bold;margin-right: auto;
+	margin-left: auto;width: 50px;margin-bottom:20px;
+	}
+	.inner {padding:40px;}
+	.example {font-style: italic;}
+	.example span {font-weight:bold;display:block;}
+	.type_desc {height:100px;}
+}
+.open_preview {
+	.span9 .row {background:silver;padding: 19px; margin-bottom: 20px; background-color: #f5f5f5; border: 1px solid #e3e3e3; -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); }
+	.span9 .row .span3 {margin-left:0px}
+	.span9 .row .span3 .btn {margin-top:10px}
+	.span5 ol li {margin-bottom:20px}
+	.span5 ol li .thetop {font-weight:bold;margin-bottom:0px}
+	.span5 ol li:last-child {margin-bottom:0px}
+	.span5 ol li .thelabel {font-size:18px}
+
+	.field_title {font-weight:bold;}
+	.field_value {font-size:16px;line-height:20px}
+	.field_value span {display:block;font-size:20px;padding-bottom: 5px;}
+	.field_holder {margin-bottom:25px;}
+	.field_holder btn {clear:both;}
+	.note {font-size:11px;}
+	.dropdown-menu li {text-align: left;}
+}
+.open_locate {
+	#map {width: 100%;height:600px;}
+	#subheader {margin-bottom:0px !important;}
+	.leaflet-control-pagecounter {	
+		border: 1px solid #888;
+		-webkit-border-radius: 5px;
+	        border-radius: 5px;
+	}
+	.resize-div-icon {background:white; cursor:move; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; border:2px solid black; font-size:28px; }
+
+	.row {padding-bottom:0px !important;}
+	.resize-div-icon i {position:relative; left:5px; top:6px; }
+	.leaflet-control-pagecounter {background:white;font-size:15px;padding: 5px;}
+		.leaflet-control-edit-in-osm .leaflet-control-edit-in-osm-toggle {font-weight:bold;text-align:center;color:#888888;text-transform: uppercase;line-height: 14px;position: relative;top:4px;}
+
+	.leaflet-popup-content {margin:14px 10px;}
+	.leaflet-popup-content-wrapper,.leaflet-popup-tip  {background:yellow;}
+	.leaflet-popup-content p {margin:13px 0;}
+	.modify-div-icon {border:thin solid black; background:white; border-radius: 3px; font-size:25px; font-weight:bold; }
+
+	.col-div-icon span {height:15px;position: relative;top: -3px; }
+
+	.col-div-icon i {position:relative;top:5px;}
+
+	#s_col {border-right:thin solid silver;padding:0px 5px;}
+	#a_col {padding-left:7px;}
+	#s_row {
+		border-bottom:thin solid silver;
+	}
+	.row-div-icon i {position:relative;left:7px;}
+	.row-div-icon span {display:block; height:24px; }
+
+}
+
+.breadcrumbs { height: 78px; list-style-type: none; margin: 0 auto; background: white ; background-image:asset-url('breadcrumbs_bg.png',image); background-repeat: repeat-x; }
+.breadcrumbs li { width: 19%; height: 78px; display: inline-block; padding-left: 0; background: white ; background-image:asset-url('breadcrumbs_active.png',image); background-repeat:no-repeat; background-position:center; text-align: center; }
+.breadcrumbs li.first { width: 20% }
+.breadcrumbs li.last { width: 20%; float: right; }
+.breadcrumbs li.done { background-image:asset-url('breadcrumbs_done.png',image); }
+.breadcrumbs li.active { background-image:asset-url('breadcrumbs_active.png',image); }
+.breadcrumbs li.pending { background-image:asset-url('breadcrumbs_pending.png',image); }
+#subheader {border-bottom: thin solid silver;height: 55px;margin-bottom:20px}

@@ -1,0 +1,183 @@
+<% content_for :userbar do %>
+   <%= render :partial => "partials/open_breadcrumb", :locals => {:active => "locate", :classes => ["done","done", "done", "active","pending"] } %>
+<% end %>
+
+<% content_for :current_page_class do %><%= @current_controller %>_<%= step.to_s %><% end %>
+
+<style>
+
+@-moz-document url-prefix() {
+    .col-div-icon i {top:7px !important}
+    .resize-div-icon i {top:9px !important}
+
+}
+
+</style>
+
+<div class="grid-content grid-survey">
+	<div class="row" style="padding-bottom: 40px;">
+    <%= render :partial => "partials/open_wizard_subheader", :locals => {:title => "Locate your survey area" }  %>
+
+	<div id="map"></div>
+	</div>
+</div><!-- Grid Content -->
+
+	<script>
+	
+$(document).ready(function() {
+	var group = new L.LayerGroup();
+	window.group = group;
+  	var colPoint = new L.Point(48,30);
+  	var rowPoint = new L.Point(30,48);
+
+  	var horiz_span = '<span id="s_col"><i class=" icon-angle-left"></i></span><span id="a_col"><i class=" icon-angle-right"></i></span>';
+
+  	var vert_span = '<span id="s_row"><i class=" icon-angle-up"></i></span><span id="a_row"><i class=" icon-angle-down"></i>';
+
+  	var colIcon = L.divIcon({html: horiz_span,className:'modify-div-icon col-div-icon',iconSize:colPoint});
+  	var rowIcon = L.divIcon({html: vert_span,className:'modify-div-icon row-div-icon',iconSize:rowPoint});
+  	window.colIcon = colIcon;
+  	window.rowIcon = rowIcon;
+
+	  $(document).ready(function() {
+
+    	$("#next_wizard_button").click(function() {
+
+    		if ($(this).hasClass('disabled')) {
+    			$(this).popover({'placement':'bottom','title':'Error','trigger' : 'manual','content': "The maximum amount of allowed grids is 16.Please reduce by dragging your area's handle, or using the column and row controls."}).popover('show');
+				setTimeout(function() {$(this).popover('hide')},2500);
+				return false;
+    		}
+	      
+	      
+    	  	var result = rectangle.getBounds();
+
+			var payload = {
+				'ne_bounds' : result.getNorthEast(),
+				'sw_bounds' : result.getSouthWest(),
+				'map_center': result.getCenter(),
+				'zoom'		: map.getBoundsZoom(result),
+				'grids'		: GridServices.PrepPayload()
+			}
+		
+	      $.ajax({
+	            type: "PUT",
+	            url: '<%= url_for wizard_path %>',
+	            data: JSON.stringify(payload),
+	            contentType: 'application/json',
+	            success: function(response) {
+	                window.location.pathname = "<%= next_wizard_path %>";
+	            }
+	        });
+	       
+    	});
+  });
+
+		<% if @survey.area %>
+		var existing = <%= raw @survey.area.to_json %>;
+		existing['grids'] = <%= raw @survey.area.grids.to_json %>;
+
+		<% else %>
+		var existing = undefined;
+		<% end %>
+
+		var map = GridServices.InitTool(existing);
+    	window.map = map;
+    	var helpGroup = new L.LayerGroup();
+
+    	var PageControl = L.Control.extend({
+    		options: {
+        		position: 'topright'
+    		},
+
+		    onAdd: function (map) {
+		        var container = L.DomUtil.create('div', 'leaflet-control-pagecounter');
+
+		        var counter = L.DomUtil.create('span', '', container);
+		        this.counter = counter
+		        var pages = L.DomUtil.create('span', "", container);
+		        pages.innerHTML = " pages";
+		        return container;
+		    },
+
+		    updateCount: function (count) {
+		    	this.counter.innerHTML = count;
+		    }
+		});
+
+
+		var myCounter = new PageControl();
+		map.addControl(myCounter);
+		window.page_counter = myCounter
+
+		var rectangle = GridServices.setRectangle(map,helpGroup,existing);
+		window.rectangle = rectangle;
+		if (existing) {
+			map.fitBounds(rectangle.getBounds());
+		}
+
+		GridServices.ResetFramer(rectangle);
+		GridServices.BindControls();
+
+		
+		var columnHelp = L.popup({maxWidth:150,offset:new L.Point(2,-13),closeButton:false})
+	    .setLatLng(window.bc_latlng)
+	    .setContent('<p>Adjust the number of grid tiles/pages vertically.</p>');
+
+	    var rowHelp = L.popup({maxWidth:150,offset:new L.Point(2,-4),closeButton:false})
+	    .setLatLng(window.cr_latlng)
+	    .setContent('<p>Adjust the number of grid tiles/pages horizontally.</p>');
+
+	    var resizeHelp = L.popup({maxWidth:150,offset:new L.Point(2,-5),closeButton:false})
+	    .setLatLng(window.marker3.getLatLng())
+	    .setContent('<p>Expand and contract your survey area.</p>');
+
+	    if (existing==undefined) {   
+	    	helpGroup.addLayer(rowHelp);
+	    	helpGroup.addLayer(columnHelp);
+
+	    	helpGroup.addLayer(resizeHelp);
+
+	    	map.addLayer(helpGroup);
+
+	    	map.on('locationfound', function(e) {
+	    		GridServices.SetModifyMarkers();
+		    	GridServices.ResetHelp(rowHelp,columnHelp,resizeHelp);
+		    	if (!map.hasLayer(helpGroup)) {
+		    		map.addLayer(helpGroup);
+		    	}
+		    	 //we need to add it again, because a zooms occur on a move.
+		    });
+
+		    map.on('drag',function() {
+	    		map.removeLayer(helpGroup);
+	    	});
+
+		    map.on('zoomend',function() {
+		    	map.removeLayer(helpGroup);
+		    });
+
+
+	    }
+	    else {
+	    	GridServices.bindMapMoves(map);
+	    }
+
+	    $(document).on('keyup','input', function(e) {
+	    	if(e.target.value.length>0) {
+	    		$('.leaflet-control-geosearch i').fadeOut('fast');
+	    	}
+	    	else {
+	    		$('.leaflet-control-geosearch i').fadeIn('fast');
+	    	}
+	    })
+
+	    new L.Control.GeoSearch({
+	    	position: 'topleft',
+		    provider: new L.GeoSearch.Provider.OpenStreetMap(),
+		    searchLabel: "    Search by Address, City, Country"
+		}).addTo(map);
+
+	});
+
+</script>

@@ -1,0 +1,16 @@
+Hello,
+
+You have just been given access to <%= @survey.user.name %>'s survey titled "<%= @survey.title %>".
+
+Please view it at <%= survey_url(@survey) %>.
+
+<% if @message.body == "" %>
+Since you are an existing user, the newly shared survey will now appear in your Survey Index upon login.
+<% else %>
+<%= @message.body %>
+<% end %>
+
+If you experience any problems, please email support@caerusgeo.com.
+
+Thanks,
+CaerusGeo

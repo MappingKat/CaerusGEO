@@ -1,0 +1,39 @@
+<header class="navbar">
+<% if user_signed_in? %>
+<div class="container" style="width:960px !important">
+
+<ul class="nav">
+  <li <% if @current_action!='help' and !['open','registrations'].include?(@current_controller) %>class="active" <% end %>>
+    <a href="<%= url_for current_user %>"><i class="icon-home" style="font-size:20px;"></i>&nbsp;<%= current_user.name %></a>
+  </li>
+  <li class="<%= @current_controller=='open' ? 'active': ''%> ">
+  	<a href="<%= url_for new_survey_path %>">
+  	<i class="icon-file" style="font-size:20px;"></i>&nbsp;New Survey
+  	</a>
+  </li>
+  <li>
+    <a href="http://caerusgeo.uservoice.com/knowledgebase"><i class="icon-plus-sign" style="font-size:20px;"></i>&nbsp;Help</a>
+  </li>
+   <li class="dropdown <%= @current_controller=='registrations' ? 'active' : '' %>">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+      <i class="icon-cog icon-white" style="font-size:20px;"></i>
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      <li><%= link_to ('Modify Account'), edit_user_registration_path %></li>
+      <li><%= link_to 'Logout', destroy_user_session_path, :method=>'delete' %></li>
+    </ul>
+  </li>
+</ul>
+	  <%= link_to image_tag('CA_GEO_Logo.png',:class => "pull-right" ,:style => "margin-top: 10px; width: 166px;margin-right: 11px;"),'/' %>
+</div>
+<% else %>
+<div class="container" style="width:960px !important;height: 50px;">
+
+<ul class="nav">
+  <%= link_to image_tag('CA_GEO_Logo.png',:class => "pull-left" ,:style => "margin-top: 10px; width: 166px;margin-right: 11px;"),'/' %>
+</ul>
+    
+</div>
+<% end %>
+</header><!-- Header -->

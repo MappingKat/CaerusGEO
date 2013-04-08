@@ -1,0 +1,11 @@
+<% content_for :userbar do %>
+	<%= render :partial => "partials/white_strip", :locals => {:survey => @report.survey,:report => @report} %>
+<% end %>
+
+<div class="grid-content grid-content-map">
+	<% if @report.method=="m" %>
+		<%= render :partial => "partials/open_manual_edit" %>
+	<% else %>
+		<%= render :partial => "partials/open_uploaded_edit" %>
+	<% end %>
+</div>

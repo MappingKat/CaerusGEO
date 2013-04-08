@@ -1,0 +1,135 @@
+<div class="site-copy clearfix">
+
+	<h2>How It Works</h2>
+
+	<ul id="survey-tabs" style="min-height:560px;">
+		<li class="active"><a href="#overview">Overview</a></li>
+		<li><a href="#dashboard">Dashboard</a></li>
+		<li><a href="#surveys">Surveys</a></li>
+	</ul>
+		
+		
+	<div class="how-content">
+	
+		<div class="site-copy-left site-copy-overview" style="display:block">
+			<p>CaerusGEO allows you to print multipage paper atlases of anywhere in the world and collect, document and visualize data of incidents, land use or social perception. Then through several easy steps the software automatically generates files that merges data details with geographic data. It's as easy as print, mark, upload and publish!</p>
+			<p>CaerusGeo also supports user accounts so you can save surveys for later or share and edit with others.</p>
+		</div><!-- Overview -->
+		
+		<div class="site-copy-left site-copy-dashboard">
+			<p>The Caerus Geo dashboard is where a summary of the survey area of data inputed into the platform is located. First-time users of the Caerus Geo website will only see blank boxes. What users see depends on data input into the system.</p>
+			<p>In the future we will hope to have high fidelity map visualizations as well as the existing chart information</p>
+		</div><!-- Dashboard -->
+		
+		<div class="site-copy-left site-copy-surveys">
+			
+			<p>
+				Clicking on the Surveys tab will reveal thumbnail maps and details of all of your survey area. <br />
+				This is your entrance into the uploading and publishing of data onto those maps. <br />
+				The Surveys that are there depend on what access you have been given to the platform.
+			</p>
+			
+			<p>
+				Clicking on one of them will take users to a more detailed page that reveals options to:<br />
+				- Look at a detailed <strong>Overview</strong>, download maps, forms, and incident data. <br />
+				- Look at a <strong>Report history</strong> of entered incident data and view individual report data. <br />
+				- <strong>Manage</strong> users of the survey.
+			</p>
+			
+			
+			<p>
+				<strong>Overview</strong><br />
+				This section gives a closer view of the districts' survey area. Different map formats of the district can be downloaded and printed for use at the LNP stations.
+			</p>
+			
+			
+			<p>
+				<strong>Report History</strong><br />
+				Once data has been entered into the survey database, users will be able to download CSV and Geo-JSON files that combine an incident?s details with the longitude and latitude data of where it occurred. These files can then be sent on to third party sites, including Ushahidi, for data visualization and analysis, but will also serve as the basis for a basic visualization in the report history section.
+			</p>
+			
+			<p>
+				<strong>Managing My Survey</strong><br />
+				Within the manage area users can edit the administrators details and add collaborators to edit the survey with. By adding a user's name and email an introductory email will be sent to their account.
+			</p>
+			
+			<p>
+				<strong>Adding Incidents to you survey</strong><br />
+				You can either add you data manually or upload a CSV file.
+			</p>
+			
+			<p>
+				<em>Uploading a CSV files</em><br />
+				The CaerusGeo platform allows you to upload multiple incidents details at one time in the form of a CSV file. Files that have been created in Excel should be saved as a CSV file for use with CaerGeo. It is important that data be clean and structured in order for the system to recognize the data set.
+			</p>
+			
+			<p>1. Click the on the <strong>Upload CSV</strong> file button.</p>
+			<p>2. Choose the file you wish to upload and click <strong>Upload</strong>.</p>
+			<p>3. Once uploaded the incident data will appear in a unique interface alongside the survey map. Each incident number is displayed in a drop-down list in the bar on the left of the map.</p>
+			<p>4. Click the bar and choose an incident number from the drop-down list. Corresponding incident data from your CSV file will appear in automated fields as it appears in your file. All the data from you csv file should appear as you go through the dropdown list. If some data is unintelligible or garbled it could be due to the structuring within the csv file. Refer to the section above on structuring your csv file for optimum results.</p>
+			
+			<p><strong>Attaching a location to your incidents</strong></p>
+			
+			<p>1. Set your Paper Atlas of marked incidents alongside your computer desktop screen.</p>
+			<p>2. Choose an incident number from the Paper Atlas and choose that same Incident number from your Caerus Geo dropdown list.</p>
+			<p>3. Click on the Location marker button.<br />This will generate a blue location marker in the center of your survey map.</p>
+			<p>4. Refer to the location of the incident number in your Paper Atlas and drag the blue marker in CaerusGeo to that same location. You have now recorded a location for that Incident number. Repeat this same procedure for the all numbers in the drop-down list.</p>
+			<p>5. Once all incident numbers have location markers attached to them. Click the green 'Save' button in the top left corner. If all information is correct. Publish your Incident. Published Incidents can not be reversed.</p>
+			
+			
+			<p>
+				<em>Manually adding incident data</em><br />
+				There may be occasion where you have only one or two incidents to upload. <br />In this case it is best to choose from the Manual Upload button.
+			</p>
+			
+			
+			<ol>
+				<li>Clicking the button will bring up the fields that from the LNP crime incident schema.</li>
+				<li>Fill in the incident number and the relevant incident details.</li>
+				<li>Click on the location marker and drag it to your desired location</li>
+				<li>Save and Publish.</li>
+			</ol>
+			
+			
+		</div><!-- Survey -->
+		
+		
+		
+		
+	
+	
+	</div><!-- How Content -->
+			
+	
+
+
+
+	
+	
+
+
+</div><!-- Site Copy -->
+
+<script>
+$(document).ready(function() {
+	$("#survey-tabs li").click(function() {
+		var target = $(this).find("a").attr('href').substring(1);
+		$('#survey-tabs li').removeClass('active');
+		$(this).addClass('active');
+		$(".site-copy-left").hide();
+		$(".site-copy-" + target).show();
+		return false;
+	})
+})
+</script>
+
+
+<style>
+/* #header-sub{display: none;} */
+p{margin-bottom: 20px;}
+.how-content{
+	float: left;
+	width: 700px;
+	padding-bottom: 100px;
+}
+</style>

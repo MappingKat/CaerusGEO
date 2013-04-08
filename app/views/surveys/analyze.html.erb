@@ -1,0 +1,115 @@
+<% content_for :title do %><%= @survey.title %> - Analyze<% end %>
+<% content_for :current_page_class do %>analyze<% end %>
+
+
+<% content_for :userbar do %>
+  <% if @current_action!='public' %>
+    <%= render :partial => "partials/white_strip", :locals => {:survey => @survey} %>
+  <% else %>
+    <%= render :partial => "partials/public_strip", :locals => {:survey => @survey} %>
+  <% end %>
+<% end %>
+
+<div class="grid-content" style="border-color:#f2f2f2">
+
+  <div class="row">
+    <div class="span12" id="report_info_strip">
+      <div class="span3">
+        <p style="font-size:16px;">Explore Available Reports</p>
+      </div>
+      <div class="span9" style="padding-left:15px">
+        <select id="source_selector" style="width:200px;">
+          <option value="All">All Reports</option>
+          <% @survey.reports.order(:title).each do |report| %>
+            <option value="<%= report.id %>"><%= report.title %></option>
+          <% end %>
+        </select>
+        <i class="icon-refresh icon-spin" id="entry_loader"></i>
+      </div>
+
+    </div>
+    <div class="span3" style="padding-top:20px;">
+      <p id="no_entries" style="display:none">No entries yet.</p>
+      <p id="counter_info">Filtering <span id="visible_count"></span> of <span id="available_count"></span> entries.
+      </p>
+      <div style="width:94%;padding-left:10px">
+        <hr>
+      </div>
+      <div id="sorting_box">
+        <div style="width:94%">
+        <% @survey.field_questions.each do |question| %>
+          <div class="q_filter type_<%= question.form %>">
+            <p>
+              <span class="q_label"><%= question.label %></span>
+            </p>
+            <% if question.form=='fillin' %>
+            <select style="width:100%" class="field_filter" id="Q<%= question.id %>">
+              <option></option>
+            </select>
+            <% elsif question.form=='number' %>
+            <div class="numberSlider" id="Q<%= question.id %>"></div>
+            <% elsif (['date','datetime']).include?(question.form) %>
+            <div class="dateSlider" id="Q<%= question.id %>"></div>
+            <% end %>
+            <hr>
+          </div>
+        <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="span9">
+      <div id="map"></div>
+    </div>
+  </div>
+</div>
+
+
+<script id="choices_template" type="text/x-underscore-tmpl">
+  <@ _.each(choices,function(choice) { @>
+    <option class="actual" value="<@= _.escape(choice) @>"><@= choice @></option>
+  <@ }) @>
+</script>
+
+<script>
+
+$(document).ready(function() {
+
+  var questions = new QuestionCollection(<%= raw @survey.actual_questions.to_json %>);
+  window.map_form = "<%= @survey.map_form %>";
+
+  <% if @current_action!='public' %>
+  var map2 = Open.InitShow(<%= raw @survey.to_json %>,true,true,'so_map');
+  window.so_map = map2;
+  <% end %>
+
+  var map = Open.InitMapQuestion(<%= raw @survey.area.bounds.to_json %>,questions.models[0]);
+
+  <% if @survey.types_used.include?('datetime') %>
+  window.tz_abbr = "<%= ActiveSupport::TimeZone.zones_map[@survey.time_zone].now.strftime('%Z') %>";
+  <% end %>
+
+  var entityGroup = new L.FeatureGroup();
+
+  var heatmapLayer = Analyze.SetUpHeatMap(map_form);
+  window.heatmap = heatmapLayer;
+  var choice_hash = Open.GetLabelsForFields(questions.toJSON());
+  var form_hash = Open.GetFormsForFields(questions.toJSON());
+
+  Open.AddFinishedEntityGroup(map, entityGroup,window.map_form);
+
+  Analyze.InitFilters(questions);
+
+  $("#source_selector").select2({placeholder:"All",dropdownCssClass:"no-search"}).on("change", function(e) {
+    Analyze.LoadData(e.val,survey_all_entries_path,report_all_entries_path,entityGroup,heatmapLayer,choice_hash,form_hash,questions); 
+  });
+
+  var survey_all_entries_path = '<%= url_for survey_all_entries_path(@survey) %>';
+  var report_all_entries_path = '/surveys/<%= @survey.id %>/reports/X/all_entries'; 
+  var initial_grab = "<%= request.query_parameters['rid'] ? request.query_parameters['rid'] : 'All' %>";
+  if (initial_grab!='All') {
+    $("#source_selector").select2('val',initial_grab);
+  }
+  Analyze.LoadData(initial_grab,survey_all_entries_path,report_all_entries_path,entityGroup,heatmapLayer,choice_hash,form_hash,questions);
+
+});
+</script>

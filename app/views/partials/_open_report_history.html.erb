@@ -1,0 +1,72 @@
+<div id="report-header" class="clearfix" style="padding-top:20px">
+    <div>
+        <div class="btn-group" style="margin-bottom:20px;">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">Result Exports   <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><%= link_to "GeoJSON", survey_export_results_geojson_path(@survey, :format => "json") %></li>
+              <li><%= link_to "CSV", survey_results_csv_path(@survey) %></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<table id="report_history_table" class="table table-bordered">
+    <tr style="background-color:#F5F5F5;color:#68657D">
+        <th style="width: 130px;">Title</th>
+        <th style="width: 75px;">Created</th>
+        <th style="width: 100px;">Updated</th>
+        <th style="width: 125px;">Author</th>
+        <th style="width: 125px;">Entries</th>
+        <th style="width: 160px;" class='no-sort'></th>
+    </tr>
+<% if @survey.reports.count > 0 %>
+<% cache "#{@survey.id}_rh" do %>
+    <% @survey.reports.order("updated_at DESC").includes(:user,:survey).each do |report| %>
+        <tr>
+            <td><%= report.title %></td>
+            <td data-ca="<%= report.created_at.to_date %>" class="created_at"></td>
+            <td data-sort="<%= report.updated_at.to_i %>" class="updated_at"></td>
+            <td><%= truncate(report.user.name, :length => 23) %></td>
+            <td>
+                <%= report.spresults.count %>
+            <% if report.method=="u" and report.unfinished_answers_count > 1 %>
+                &nbsp;&nbsp;(<%= report.unfinished_answers_count %> unfinished)
+            <% end %>
+            </td>
+            <td colspan="2">
+                <a class="btn" style="margin-right:15px;margin-left:14px;float:left" href="<%= url_for edit_survey_report_path(report.survey,report) %>"><i class="icon-search"></i> View</a>
+                 <div class="dropdown" style="display:inline">
+                    <a class="dropdown-toggle btn <% if report.finished_answers.count == 0 %> disabled <% end %>" id="dLabel" role="button" data-toggle="dropdown" data-target="#">
+                    Exports
+                    <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu" style="width:77px;min-width:77px;top:21px;" role="menu" aria-labelledby="dLabel">
+                        <li><%= link_to "CSV",report_export_csv_path(@survey,report) %>
+                        </li>
+                        <li><%= link_to "GeoJSON",report_export_results_geojson_path(@survey,report) %>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+    <% end %>
+<% end %>
+
+<% else %>
+	<tr>
+        <td colspan="6">You haven't made any reports yet.  Use the orange "Add Data" button in the upper right hand corner of the page to create one.</td>
+    </tr>
+<% end %>
+</table>
+
+<script>
+$(document).ready(function() {
+    $('.created_at').each(function() {
+        $(this).text(moment($(this).data('ca')).format('L'));
+    });
+
+    $('.updated_at').each(function() {
+        $(this).text(moment.unix($(this).data('sort')).fromNow());
+    });
+});
+</script>

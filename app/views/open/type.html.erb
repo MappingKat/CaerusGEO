@@ -1,0 +1,100 @@
+<% content_for :userbar do %>
+   <%= render :partial => "partials/open_breadcrumb", :locals => {:active => "type", :classes => ["done","active", "pending", "pending","pending"] } %>
+<% end %>
+<% content_for :current_page_class do %><%= @current_controller %>_<%= step.to_s %><% end %>
+
+<style>
+.type_img {background-image: url(<%= asset_path('Maptype-icons_sprites.png') %>);}
+</style>
+
+<div class="grid-content grid-survey">
+	<div class="row" style="padding-bottom: 40px;">
+    <%= render :partial => "partials/open_wizard_subheader", :locals => {:title => "Choose what type of survey you want to do" }  %>
+   <%= form_for @survey, :url => wizard_path, :method => :put do |f| %>
+
+		<div class="span4 type_div" >
+      <div class="inner">
+        <div class="type_img" id="points"></div>
+          <label class="radio">
+            <input type="radio" name="entity_type" value="geo_point">
+            Points
+          </label>
+          <p class="type_desc">
+            Points are used for recording specific location information on the surface of the planet. Each point on the map is stored as a latitude and longitude coordinate.</p>
+          <p class="example">
+            <span>Example usage</span>
+            Documenting Street Addresses, Crime incidents, Places of interest
+          </p>
+      </div>
+    </div>
+    <div class="span4 type_div" >
+      <div class="inner">
+        <div class="type_img" id="areas"></div>
+          <label class="radio">
+            <input type="radio" name="entity_type" value="geo_polygon">
+            Areas
+          </label>
+          <p class="type_desc">For recording fully encompassed areas as shapes.Each area contains at least 3 points.</p>
+          <p class="example">
+            <span>Example usage</span>
+            Vegetation, Tribal areas, Crop types, State boundaries</p>
+        </div>
+    </div>
+    <div class="span4 type_div" >
+      <div class="inner">
+        <div class="type_img" id="lines"></div>
+        <label class="radio">
+          <input type="radio" name="entity_type" value="geo_line">
+          Lines
+        </label>
+
+        <p class="type_desc">
+          Lines are used to connect two x-y coordinates (X = longitude, Y = latitude). The more points used to create the line, the greater the detail.
+        </p>
+        <p class="example">
+          <span>Example usage</span>
+          Pathways, Routes, Directions</p>
+      </div>
+		</div>
+    <span style="display:none">
+      <%= f.submit %>
+    </span>
+    <% end %>
+
+	</div>
+</div><!-- Grid Content -->
+
+<script>
+$(document).ready(function() {
+  $('.type_img').click(function() {
+    $(this).parent().find('input').click();
+  })
+
+  $('.type_div').on('mouseenter',function() {
+    $(this).addClass('active');
+  });
+  $('.type_div').on('mouseleave',function() {
+    if ($(this).find('input').attr('checked')!='checked') {
+      $(this).removeClass('active');
+    }   
+  });
+
+  $('input').click(function() {
+    $('.type_div').removeClass('active');
+    $(this).closest('.type_div').addClass('active');
+  });
+
+  $('#next_wizard_button').click(function() {
+    if ($('input:checked').length==0) {
+      alert('Please pick a survey type first.');
+    }
+    else {
+      $('form input[type=submit]').click();
+    }
+  });
+
+  <% if @survey.questions.exists? %>
+    $("input[value=<%= @survey.questions.order(:index).first.form %>]").click();
+  <% end %> 
+})
+</script>

@@ -1,0 +1,69 @@
+// Place all the styles related to the home controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+#homepage {
+	.navbar .nav li:hover {color:inherit !important}
+
+	#content_container {background:white;width:1050px !important;}
+	.subsection h2 {font-size:28px;color:#5a5a59;margin-bottom:9px;}
+	.subsection p {font-size:15px;color:#818486;margin-bottom:15px;}
+	#intro h2 {line-height: 28px;margin-bottom:20px;}
+	#homenav {
+	.container {width:1050px !important;background:white;height:68px;}
+	background: #F2F2F2;}
+	$cg_green: #6BB130;
+
+	.navbar .nav .active > a {
+		background:none !important;
+		color:$cg_green !important;
+		padding-top:1px;
+	}
+
+	#intro {
+		height:545px;width:1050px !important;
+		#box {
+			h2 {margin-bottom:115px;color:white;font-size:24px;}
+			padding:20px;position:relative;width:280px;height:280px;top:20px;	
+		}
+		.nav {position:relative;top:3px;}
+		.span4 {padding-left:20px;}
+	}
+	
+	#white_strip {display:none;}
+	#wrap {padding-top:68px;}
+	.active > a {
+		border-top:4px solid $cg_green;
+		background:none;
+	}
+
+	.navbar .nav > li > a  {
+		color:gray;
+		padding:5px 10px;
+		padding-left: 0px;
+		&:hover {color:lightgray !important;padding-top:1px;border-top:4px solid lightgray !important;}
+	}
+
+	#auth_sec {
+		font-size: 15px;width:120px;
+		font-weight: bold;padding: 5px 10px;line-height: 19px;margin-left:65px;position: relative;
+		left: 13px;
+		&:hover {border:none;}
+	}
+	.navbar .nav > li {
+		width: 60px;
+		text-align:left;
+		margin-left: 50px;
+	}
+
+	.navbar .nav > li > span  {
+		color:gray;
+		cursor:pointer;
+		&:hover {color:black !important }
+	}
+
+	.navbar .nav li:hover {background:none}
+	.subsection {width:1050px !important;padding-top:70px;}
+	.subsection .span8 {height:420px !important;width: 570px;margin-top:55px;}
+	.subsection .span4 {padding-top:10px;padding-left: 30px;width:340px;}
+}

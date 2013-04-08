@@ -1,0 +1,44 @@
+<% content_for :title do %><%= @survey.title %><% end %>
+
+
+<% content_for :userbar do %>
+	<%= render :partial => "partials/white_strip", :locals => {:survey => @survey} %>
+<% end %>
+
+
+<div class="grid-content">
+	<div class="container">
+		<div class="span12" style="margin-left:0px">
+		<div class="tab-content" style="min-height: 400px;">
+			<div class="tab-pane active" id="report_history"><%= render :partial => "partials/open_report_history" %></div>
+			<% if @survey.user == current_user %><div class="tab-pane" id="manage"><%= render :partial => "partials/survey_manage" %></div><% end %>
+			<div class="tab-pane" id="downloads"><%= render :partial => "partials/open_downloads" %></div>
+		</div><!-- Survey Info -->
+		</div>
+	</div>
+</div><!-- Grid Content -->
+
+
+<script>
+
+	
+$(document).ready(function() {
+	var map = Open.InitShow(<%= raw @survey.to_json %>,true,true,'so_map');
+	window.so_map = map;
+
+	if(window.location.hash=="#m") {
+		$('#sharing').tab('show');
+	}
+
+	if(window.location.hash=="#d") {
+		$('#download_link').tab('show');
+	}
+	
+	<% if @survey.reports.count > 0 %>
+	new Tablesort(document.getElementById('report_history_table'));
+	<% end %>
+});
+
+</script>
+
+

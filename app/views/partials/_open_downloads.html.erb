@@ -1,0 +1,65 @@
+<div style="padding-top:20px">
+
+	<div class="span6" style="margin-left:0px">
+		<div class="download_holder">
+			<h3>Wallmap</h3>
+			<div class="span3">
+				<%= image_tag "CAGEO_Download_wallmap.jpg" %>
+
+				<p>
+					<a class="btn" href="<%= url_for survey_print_wallmap_path(@survey) %>">Download PDF<i class="icon-arrow-down"></i></a>
+				</p>
+			</div>
+			<div class="span3">
+				<p>The survey area as a large format A0 map. Ideal for community mapping projects or discussions. Can be printed on large format printers.</p>
+			</div>
+		</div>
+
+		<div class="download_holder">
+			<h3>Data collection worksheet</h3>
+			<div class="span3">
+				<%= image_tag "CAGEO_Download_Datasheet.jpg" %>
+
+				<p>
+					<a class="btn" href="<%= url_for survey_export_blank_results_path(@survey,:format => :pdf) %>">Download PDF<i class="icon-arrow-down"></i></a>
+				</p>
+			</div>
+			<div class="span3">
+				<p>A tabular form layout of your data fields for recording survey entries whilst in the field.</p>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="span6">
+		
+		<div class="download_holder">
+			<h3>Atlas</h3>
+			<div class="span3">
+				<%= image_tag "CAGEO_Download_Atlas.jpg" %>
+				<p>
+					<a class="btn" href="<%= url_for survey_print_atlas_path(@survey) %>">Download PDF<i class="icon-arrow-down"></i></a>
+				</p>
+
+			</div>
+			<div class="span3">
+				<p>The survey area as a small 8.5" x 11" Atlas. Each page contains a section of your survey area. Ideal for carrying around in the field. Can be printed on laser or inkjet printer.</p>
+			</div>
+		</div>
+
+		<div class="download_holder">
+			<h3>CSV collection template</h3>
+			<div class="span3">
+				<%= image_tag "CAGEO_Download_Datasheet.jpg" %>
+
+				<p>
+					<a class="btn" href="<%= url_for survey_export_csv_template_path(@survey) %>">Download CSV<i class="icon-arrow-down"></i></a>
+				</p>
+			</div>
+			<div class="span3">
+				<p>A comma-delimited form file (.csv) for entering multiple survey entries. This gives you the ability to upload multiple survey entries at once. Use this if you have already captured your entries and need to transcribe into the CaerusGeo upload format.</p>
+			</div>
+		</div>
+
+	</div>
+</div>

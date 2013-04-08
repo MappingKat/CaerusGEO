@@ -1,0 +1,57 @@
+// Place all the styles related to the Collaborators controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+/* @group Survey - Manage */
+
+#collab_email, #add_person{
+	float: left;
+	margin-right: 10px;	
+}
+
+
+.manage-title{
+	height: 21px;
+	display: block;
+	width: 99%;
+	padding-left: 1%;
+	background-color:#DCDCDB;
+	font-size: 12px;
+	line-height: 22px;
+	margin-bottom: 10px;
+}
+
+.manage-list{
+	list-style-type: none;
+	padding: 0 !important;
+	margin: 0 0 25px !important;
+	display: block;
+}
+
+.manage-list .btn-small{
+	padding: 2px 9px;
+	margin-bottom: 5px;
+}
+
+#manage_section {
+	#public_access span.label {font-size:14px;}
+	#iframe_section {display:none;}
+	.big_icons {margin-right: 10px;
+	position: relative;font-size:17px;
+	top: 4px;}
+	h2 {font-size:20px;color:#3C3C3C;}
+	.remove {color:gray;margin-right:5px}
+	#collab_section .span3 {margin-left:0px;}
+	#collab_section li {border-bottom: thin solid silver;
+	height: 30px;padding-top: 10px;}
+	#collab_section li a {text-decoration: none}
+	.manage-list .span3 {font-size:15px;color:#222222;}
+	#admin {color:gray;}
+	#public_active {background:#DFF0D8;}
+	#public_save {display:none;clear: both;margin-top: 15px;}
+	#public_access form {margin:0px;}
+	#public_access label {display:inline;font-size:15px;margin-left: 10px;
+    position: relative;
+    top: 1px;}
+	#public_access input[type='checkbox'] {float:left;font-size:20px;}
+}

@@ -1,0 +1,167 @@
+<% content_for :userbar do %>
+   <%= render :partial => "partials/open_breadcrumb", :locals => {:active => "preview", :classes => ["done", "done", "done", "done","active"]  } %>
+<% end %>
+<% content_for :current_page_class do %><%= @current_controller %>_<%= step.to_s %><% end %>
+
+<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <h3 id="myModalLabel"><i class="icon-ok-sign" style="font-size: 26px;
+margin-right: 10px;
+color: #83c34d;"></i> Your Survey has been published</h3>
+  </div>
+  <div class="modal-body">
+    <p>Your survey map and questions have now been published.  It is now available to use now.</p><p>What would you like to do next?</p>
+  </div>
+  <div class="modal-footer" style="text-align:left">
+    <table><tr>
+      <td style="width:150px;">
+        <a class="btn btn-success" href="<%= url_for(next_wizard_path) %>">View Survey</a>
+    </td>
+  <td>
+    <a class="btn" style="margin-right:20px;" href="<%= url_for survey_print_atlas_path(@survey) %>" target="_blank">Download Atlas <i class="icon-arrow-down"></i></a>
+  </td>
+  <td>
+    <a class="btn" href="<%= url_for survey_export_blank_results_path(@survey,:format => :pdf) %>" target="_blank">Download Worksheet <i class="icon-arrow-down"></i></a>
+  </td>
+</tr>
+</table>
+  </div>
+</div>
+
+
+<div class="grid-content grid-survey wizard">
+	<div class="row">
+    <%= render :partial => "partials/open_wizard_subheader", :locals => {:title => "Review Your Survey" }  %>
+
+		<div class="span9">
+
+      <div class="row">
+        <div class="span3">
+          <p class="field_title">Survey Info</p>
+          <%= link_to "Edit", wizard_path(:info), :class => "btn" %>
+
+        </div>
+
+        <div class="span5">
+          <p class="field_value"><%= @survey.title %></p>
+
+          <p class="field_value"><%= @survey.description %>&nbsp;</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span3">
+          <p class="field_title">Survey Type</p>
+          <%= link_to "Edit", wizard_path(:type), :class => "btn" %>
+
+        </div>
+        <div class="span5">
+          <p class="field_value">
+          <% if @survey.map_form=='geo_point' %>
+          <span style="font-size:18px;">Points</span>
+          Points are used for recording specific location information on the surface of the planet. Each point on the map is stored as a latitude and longitude coordinate.
+          <% elsif @survey.map_form=='geo_polygon' %>
+          <span style="font-size:18px;">Areas</span>
+          For recording fully encompassed areas as shapes.
+          <% else %>
+          <span style="font-size:18px;">Lines</span>
+          Lines are used to connect two x-y coordinates (X = longitude, Y = latitude). The more points used to create the line, the greater the detail
+          <% end %>
+
+          </p>
+          
+        </div>
+
+      </div>
+
+            <div class="row">
+        <div class="span3">
+          <p class="field_title">Survey Fields</p>
+          <%= link_to "Edit", wizard_path(:add_questions), :class => "btn" %>
+
+        </div>
+        <div class="span5">
+
+          <ol style="list-style:none;margin-left:0px">
+            <% @survey.field_questions.each do |question| %>
+            <li class="questions">
+              <p class="thetop">Field Heading <%= question.index %> <span style="font-style:italic;font-weight:bold">(<%= question.nice_version %>)</span>
+               </p>
+              <p class="thelabel"><%= question.label %></p>
+              <% if question.note %> 
+              <p class="note"><span>Note:</span><%= question.note %>
+              <% end %>
+            </li>
+            <% end %>
+          </ol>
+
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="span3">
+          <p class="field_title">Survey Area</p>
+                    <%= link_to "Edit", wizard_path(:locate), :class => "btn" %>
+
+        </div>
+        <div class="span5">
+          <p class="field_value"><%= @survey.location %>
+            <div id="map" style="width:100%;height:300px;"></div>
+          </p>
+        </div>
+
+      </div>   
+
+
+      
+    </div>
+
+		<div class="span3" id="tips" style="margin-left:20px">
+      <p class="tip_title">Tips</p>
+      <p>Confirm that all your settings are correct, then hit the green Publish button above.</p>
+      <p>You can go back and edit any section with the Edit buttons of each section.</p>
+		</div>
+	</div>
+
+</div><!-- Grid Content -->
+
+<script>
+
+var questions = new QuestionCollection(<%= raw @survey.questions.to_json %>);
+
+$(document).ready(function() {
+
+  $("#next_wizard_button").click(function() {
+    $.ajax({
+      url:"<%= wizard_path %>",
+      type:"PUT",
+      data:{survey:
+              {status:true}
+            },
+      success: function(response) {
+        $('#myModal').modal({})
+      },
+      error:function(response) {
+        alert('Sorry, there was an error.')
+      }
+    });
+  });
+
+  _.each(questions.models,function(question) {
+
+    var type = question.get('form');
+
+      if (type=='geo_point' || type=='geo_circle' || type=='geo_polygon' || type=="geo_line") {
+        var mapname = "map";
+        var osm = new L.TileLayer(osmUrl,{minZoom:0,maxZoom:18,attribution:osmAttrib,detectRetina:true});
+        var map = Open.InitMapQuestion(<%= raw @survey.area.bounds.to_json %>,question,mapname,osm);
+
+        GridServices.DrawAGrid(map,<%= raw @survey.area.grids.includes(:ne,:sw).to_json() %>,osm);
+        
+      }
+
+  });
+
+});
+</script>

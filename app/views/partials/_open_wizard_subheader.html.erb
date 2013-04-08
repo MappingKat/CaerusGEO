@@ -1,0 +1,23 @@
+<div id="subheader">
+	<div class="span8">
+		<h2 style="margin-left: 10px;">
+			<%= title %>
+		</h2>
+	</div>
+
+	<div class="span4">
+		<p style="float:right;margin-top:5px">
+		<% if previous_wizard_path!=request.path %>
+		  <a class="btn" href="<%= previous_wizard_path %>"><i class="icon-angle-left"></i> Back</a>
+		<% end %>
+		  <a class="btn btn-success" id="next_wizard_button" style="margin-left:7px" >
+		  	<% if next_wizard_path.ends_with?('finish') %>
+		  		Publish
+		  	<% else %>
+		  		Next <i class="icon-angle-right"></i>
+		  	<% end %>
+		  	</a>
+		</p>
+	</div>
+</div>
+

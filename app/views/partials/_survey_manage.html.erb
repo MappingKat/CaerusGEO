@@ -1,0 +1,133 @@
+<div class="row" style="padding-top:15px" id="manage_section">
+  <div class="span6">
+    <h2 style="margin-bottom:10px"><i class="icon-group big_icons"></i>Collaborators</h2>
+    <p style="font-size:12px;color:#888888;clear:both;margin-bottom:20px;">Collaborators can add reports to your survey and view your visualizations.</p>
+    <div id="collab_section"></div>
+  </div>
+  <div class="span6" id="public_access">
+    <h2 style="margin-bottom:10px">
+      <i class="icon-<%= @survey.public ? "un" : "" %>lock big_icons"></i>Public access</h2>
+      <p style="font-size:12px;color:#888888;margin-bottom:20px;">Public access allows anyone to view the visualization of your survey's reports.</p>
+    <div class="well" id="<%= @survey.public ? "public_active" : '' %>">
+      <%= form_for @survey do |f| %>
+        <%= f.label :public, 'Active' %>
+        <%= f.check_box :public %>
+        <div id="public_save">
+          <%= f.submit "Save", :class => "btn btn-success" %>
+        </div>
+      <% end %>
+    </div>
+    
+        <% if @survey.public %>
+        <p>Share</p>
+        <div class="well" style="font-size:19px">
+        <a href="<%= url_for(:action => "public", :only_path => false) %>"><%= url_for(:action => "public", :only_path => false) %></a>
+        </div>
+        
+        <p style="margin-top:20px;">Embed</p>
+
+          <textarea readonly style="width:97%;height:50px">&lt;iframe src=&quot;<%= url_for(:action => "public", :only_path => false) %>&quot; style=&quot;width:990px;height:600px;&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+          </textarea>
+        <% end %>
+    </div>
+</div>
+<script type="text/template" id="collab_template">
+<div class="span3">
+  <input type="text" id="collab_email" class="span3" placeholder="Enter an email address.">
+</div>
+<div class="span2">
+  <a class="btn btn-success" id="add_person">Add Collaborator</a>
+</div>
+
+<div class="clear" style="margin-bottom: 23px;"></div>
+<ul id="others" class="manage-list">
+  <li style="border-top: thin solid silver">
+      <div class="span3" id="admin">
+        <%= @survey.user.name %>
+      </div>
+      <div class="span2">
+        <span class="badge">ADMIN</span>
+      </div>
+  </li>
+
+	<@ _.each(collaborators,function(person) { @>
+    <li>
+      <div class="span3">
+    		<@ if (person.get('existing')) { @>
+    		  <@= person.get('existing') @>
+    		<@ } else { @>
+          <@= person.get('email') @>
+    		<@ } @>
+      </div>
+      <div class="span2">
+         <a href="#" class="remove" data-cid="<@= person.cid @>">
+        <i class="icon-remove"></i></a>
+      </div>
+    </li>
+    <@ }) @>
+</ul>
+</script>
+
+
+<script>
+
+$(document).ready(function() {
+
+  var ManagementSection = Backbone.View.extend({
+
+    el: "#collab_section",
+
+    tagName: "li",
+
+    events: {
+      'click a#add_person' : 'add',
+      'click .remove': 'destroy'
+    },
+
+    initialize: function() {
+      var self = this;
+      this.collection.bind("reset", function() {self.render();});
+      this.collection.bind("sync", function() {self.collection.fetch();});
+      this.collection.bind("remove", function() {self.collection.fetch();});
+    },
+
+    add: function() {
+      var email = $.trim($("#collab_email").val());
+      if (validateEmail(email) && email!="<%= @survey.user.email %>") {
+        this.collection.create({
+          email: email
+        },{
+         error: function() {
+           alert(email +" encountered an error saving.This is because this person is already a collaborator.");
+           }
+        });
+        $("#collab_email").val();
+      }
+      else {
+        alert("Please enter a valid email.");
+      }
+
+    },
+
+    destroy: function(e) {
+      var cid = $(e.target).parent().data('cid');
+      var collab = this.collection.getByCid(cid);
+      collab.destroy();
+      return false;
+    },
+
+
+    render: function() {
+      var variables = { collaborators: this.collection.models };
+      var template = _.template( $("#collab_template").html(), variables );
+      this.$el.html( template ); 
+      return this 
+    } 
+
+  });
+
+  Open.InitManageSection(<%= raw @survey.collaborators.to_json %>,ManagementSection,"<%= url_for survey_collaborators_path(@survey) %>");
+  
+});
+
+</script>

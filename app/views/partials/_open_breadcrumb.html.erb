@@ -1,0 +1,27 @@
+<ol class="breadcrumbs">
+	<li class="first <%= classes[0] %>">
+		<div class="icon"><%= classes[0] == "done" ? raw("<i class='icon-white icon-ok'></i>") : "1" %></div>
+		<span>Survey Info</span>
+	</li><li class="<%= classes[1] %>">
+		<div class="icon"><%= classes[1] == "done" ? raw("<i class='icon-white icon-ok'></i>") : "2" %></div>
+		<span>Survey Type</span>
+	</li>
+	<li class="<%= classes[2] %>">
+		<div class="icon"><%= classes[2] == "done" ? raw("<i class='icon-white icon-ok'></i>") : "3" %></div>
+		<span>Survey Fields</span>
+	</li>
+	<li class="<%= classes[3] %>">
+		<div class="icon"><%= classes[3] == "done" ? raw("<i class='icon-white icon-ok'></i>") : "4" %></div>
+		<span>Survey Area</span>
+	</li>
+	<li class="last <%= classes[4] %>">
+		<div class="icon"><%= classes[4] == "done" ? raw("<i class='icon-white icon-ok'></i>") : "5" %></div>
+		<span>Review &amp; Publish</span>
+	</li>
+</ol>
+
+<style>
+.grid-content .row {padding-top:20px;}
+#white_strip .container {padding-top: 23px !important;
+padding-bottom: 19px;}
+</style>

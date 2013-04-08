@@ -1,0 +1,51 @@
+<div class="site-copy clearfix">
+
+	<h2>About</h2>
+
+	<ul id="survey-tabs">
+		<li class="active"><a href="#overview">Overview</a></li>
+		<li class=""><a href="#partners">Partners</a></li>
+	</ul>
+		
+	<div class="site-copy-left site-copy-overview" style="display:block">
+		<p>CaerusGEO is a open, online cloud-based platform for generating printed map surveys and online tools for collecting, analyzing, sharing, and visualizing social map data.</p>
+		<p>The CaerusGEO software platform is part of an integrated service and toolkit that makes social mapping and social data more accessible among governments, NGO's, and Community Groups who want to better understand the social dimensions of complex, conflict-affected places.</p>
+		<p>CaerusGEO was developed by Caerus Associates whose goal is to help communities and organizations create higher fidelity and more sustainable geo-social information programs by lowering the barriers to access, aligning with local incentives, and improving the fidelity of mapping and analysis.</p>
+		
+	</div>
+
+
+	<div class="site-copy-left site-copy-partners">
+
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+</div><!-- Site Copy -->
+
+<script>
+$(document).ready(function() {
+	$("#survey-tabs li").click(function() {
+		var target = $(this).find("a").attr('href').substring(1);
+		$('#survey-tabs li').removeClass('active');
+		$(this).addClass('active');
+		$(".site-copy-left").hide();
+		$(".site-copy-" + target).show();
+		return false;
+	})
+})
+</script>
+
+<style>
+/* #header-sub{display: none;} */
+p{margin-bottom: 20px;}
+</style>

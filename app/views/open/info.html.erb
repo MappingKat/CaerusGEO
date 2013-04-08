@@ -1,0 +1,44 @@
+<% content_for :userbar do %>
+   <%= render :partial => "partials/open_breadcrumb", :locals => {:active => "info", :classes => ["active", "pending", "pending", "pending","pending"]  } %>
+<% end %>
+<% content_for :current_page_class do %><%= @current_controller %>_<%= step.to_s %><% end %>
+<style type="text/css">
+    textarea { height:90px; }
+    input,textarea { font-size:16px; }
+    #tips p {font-size:12px;}
+  </style>
+
+<div class="grid-content grid-survey wizard">
+  <div class="row">
+    <%= render :partial => "partials/open_wizard_subheader", :locals => {:title => "What would you like to call your survey?" }  %>
+
+    <div class="span9">
+    <%= simple_form_for(@survey, :url => wizard_path, :method => :put) do |f| %>
+      <%= f.input :title, :input_html => {:class => "span5"}, :placeholder => "Survey Title", :required => false %>
+      <%= f.input :description, :placeholder => "Write a short description of your survey and its goals",:input_html => {:class => "span5"}, :as => :text, :required => false %>
+      <%= f.submit 'Next', :class => 'btn btn-success btn-large', :style => "display:none" %>
+    <% end %>
+    </div>
+    <div class="span3" id="tips">
+      <p class="tip_title">Tips</p>
+      <p>Label your survey well to help differentiate it inside your collection.</p>
+
+      <p>The description field is optional, but it may provide helpful supplementary information to those who you share the survey with.
+      </p>
+    </div>
+  </div>
+</div><!-- Grid Content -->
+
+<script>
+$(document).ready(function() {
+  $("#next_wizard_button").click(function() {
+    if ($("#survey_title").val()=="") {
+      alert('Please enter a survey title.')
+    }
+    else {
+      $('form input[type=submit]').click();
+    }
+    
+  });
+})
+</script>

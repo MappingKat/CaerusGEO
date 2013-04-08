@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= content_for?(:title) ? ("CaerusGeo - " + yield(:title)).html_safe : "CaerusGeo" %></title>
+    <meta name="description" content="CaerusGeo allows you to print multipage paper atlases of anywhere in the world and collect, document and visualize data of incidents, land use or social perception.">
+    <meta name="author" content="">
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <% on_prod = Rails.env == 'production' && ENV['ACTUAL_DOMAIN']==request.host %>
+    <script>
+    window.bing_api_key = "<%= on_prod ? ENV['BING_PROD_KEY'] : ENV['BING_DEV_KEY'] %>";
+    </script>
+    <link rel="stylesheet" href="//cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
+	<!--[if lte IE 8]>
+	    <link rel="stylesheet" href="//cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
+	<![endif]-->
+
+	<script src="//cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
+
+    <%= favicon_link_tag %>
+    <%= stylesheet_link_tag    "application", :media => "all" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tags %>
+    <%= yield(:head) %>
+    <% if on_prod %>
+    <script type="text/javascript">
+
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-38169132-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+
+	</script>
+    <% end %>
+
+
+  </head>
+  
+  
+<body id="<%= content_for?(:current_body_id) ? yield(:current_body_id) : '' %>">
+	<div id="wrap">
+		<%= content_for?(:navbar) ? yield(:navbar) : render('layouts/navigation') %>
+
+		<div id="white_strip">
+		  	<div class="container">
+		  		<%= content_for?(:userbar) ? yield(:userbar) : "" %>
+			</div>
+		</div>
+	   
+		<div class="container <%= content_for?(:current_page_class) ? yield(:current_page_class) : '' %>" id="content_container">
+			<%= render 'layouts/messages' %>
+			<%= yield %>
+		</div> <!--! end of .container -->
+		
+		
+		<div id="push"></div>
+
+	</div>
+
+	<footer id="footer">
+		<div class="container">
+			<div class="span10" style="margin-left: 0px;">
+				<ul class="inline" style="margin-left:25px">
+					<li><%= link_to "Contact", contact_path %></li>|
+					<li><%= link_to "Team", team_path %></li>|
+					<li><%= link_to "Blog", "http://blog.caerusgeo.com" %></li>
+				</ul>
+				<p id="last_line">© 2013 CaerusGeo. <%= link_to "Terms & Privacy",  terms_path %></p>
+
+			</div>
+		<div class="span2" id="social_footer">
+				<a href="http://www.linkedin.com/pub/caerus-geo/66/332/82">
+					<i class="icon-linkedin"></i>
+				</a>
+				<a href="https://twitter.com/CaerusGEO">
+					<i class="icon-twitter"></i>
+				</a>
+				<a href="http://www.facebook.com/pages/Caerus-GEO/163998430417013">
+					<i class="icon-facebook"></i>
+				</a>
+		</div>
+
+	</div>
+		
+	</footer>
+	<% if on_prod %>
+	<script type="text/javascript">
+	  var uvOptions = {};
+	  (function() {
+	    var uv = document.createElement('script'); uv.type = 'text/javascript'; uv.async = true;
+	    uv.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'widget.uservoice.com/ozbrkc5vIASO6zzljI4HaQ.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(uv, s);
+	  })();
+	</script>
+	<% end %>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<%= render :partial => "partials/survey_finished_questions", :locals => {:open => false} %>
+<% content_for :current_page_class do %>report_edit_manual report_edit<% end %>
+
+<div class="row">
+  <div class="span4">
+    <p id="this_quantity" class="well"><%= pluralize(@report.spresults.count,"Entries") %> Created</p>
+    <a class="btn" href="#" id="done_with_respondent_button">Save</a>
+    <a class="btn" href="#" id="new_respondent_button"><i class="icon-plus"></i>New Entry</a>
+    <ul id="questions"></ul>
+  </div>
+
+  <div class="span8">
+    <p id="save_indicator">Saved.</p>
+    <div id="entry_area">
+  	 <div id="map"></div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+window.count = <%= @report.spresults.count %>;
+window.map_form = "<%= @report.survey.map_form %>";
+<% if @report.survey.types_used.include?('datetime') %>
+window.tz_abbr = "<%= ActiveSupport::TimeZone.zones_map[@survey.time_zone].now.strftime('%Z') %>";
+<% end %>
+var questions = new QuestionCollection(<%= raw @report.survey.actual_questions.to_json %>);
+
+Spresult = Backbone.Model.extend({});
+
+var SpresultCollection = Backbone.Collection.extend({
+    model: Spresult
+});
+
+Spresults = new SpresultCollection();
+Spresults.url = '<%= url_for survey_report_spresults_path(@report.survey,@report) %>';
+
+$(document).ready(function() {
+  EntryServices.InitManualEntryTool('<%= url_for survey_analyze_path(@report.survey) %>',<%= raw @report.survey.area.bounds.to_json %>,<%= raw @report.survey.area.grids.includes(:ne,:sw).to_json() %>);
+});
+</script>

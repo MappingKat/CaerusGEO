@@ -1,0 +1,16 @@
+<% content_for :title do %>Error<% end %>
+<style>
+.alert {display: none}
+#white_strip {display:none;}
+</style>
+<div class="grid-content">
+	<div class="container">
+		<div class="span12" style="margin-left:0px;height:200px;padding:20px">
+		<h2><%= flash[:notice] %></h2>
+		<h2><%= flash[:alert] %></h2>
+
+		</div>
+	</div>
+</div><!-- Grid Content -->
+
+

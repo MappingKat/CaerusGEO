@@ -1,0 +1,46 @@
+<div class="grid-content clearfix" style="padding:12px 23px 20px">
+
+	<h2>Sign up</h2>
+	<style>
+	.control-label {
+	font-size:14px;
+	}
+	
+	label {
+	  float: left;
+	width:300px;
+	font-size:10px;
+	}
+	
+	abbr[title] {
+	display:none;
+	  }
+	  
+	 #header-sub{display: none;}
+	</style>
+	<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
+	  <%= f.error_notification %>
+	
+	  <div class="inputs" style="margin-top:10px">
+<!-- 	    <h3 class="well">Personal Information</h3> -->
+	  	<%= f.input :name, :required => true %>
+	
+	    <%= f.input :email, :required => true, :autofocus => true %>
+	    <%= f.input :password, :required => true %>
+	    <%= f.input :password_confirmation, :required => true %>
+	   	<%= f.input :time_zone, :priority => /US/ %>
+
+	    <br>
+	    <br>
+	    <br>
+	    <hr>
+	  </div>
+	<br>
+	<hr>
+	  <div class="actions">
+	    <%= f.button :submit, "Create Profile", :class => "btn-large btn-success", :style => "float:left" %>
+	  </div>
+	<% end %>
+
+
+</div><!-- Grid COntent -->

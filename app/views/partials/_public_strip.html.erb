@@ -1,0 +1,7 @@
+<div class="span6" style="margin-left:0px;padding-left:10px;">
+	<h2 id="title_line" style=""><%= link_to(survey.title,survey) %></h2>
+</div>
+<div class="span6" style="float:right;text-align: right;margin-top: 10px;color: black;font-size: 12px;">
+<p>You are viewing this survey as a guest.</p>
+<%= link_to "Want to create a survey with this schema for another area?", new_survey_path(:base => survey.id) %>
+</div>

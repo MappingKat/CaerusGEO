@@ -1,0 +1,61 @@
+<style>
+.question_label {font-size:1.4em;}
+</style>
+
+<script id="label_template" type="text/x-underscore-tmpl">
+    <p class="question_label"><@= label @></p>
+</script>
+
+<script id="fillin_template" type="text/x-underscore-tmpl">
+  <li id="<@= id @>">
+    <@= _.template($("#label_template").html(),{'label':label},{}) @>
+    <@ if (note) { @>
+    <p class="finished_note"><@= note @></p>
+    <@ } @>
+    <input type="text" class="answer" placeholder="Enter text">
+  </li>
+</script>
+
+<script id="date_template" type="text/x-underscore-tmpl">
+  <li id="<@= id @>">
+    <@= _.template($("#label_template").html(),{'label':label},{}) @>
+    <@ if (note) { @>
+    <p class="finished_note"><@= note @></p>
+    <@ } @>
+    <div class="chronopicker input-append">
+      <input data-format="MM/dd/yyyy" type="text" class="answer" placeholder="Use the Calendar button"></input>
+      <span class="add-on">
+        <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+        </i>
+      </span>
+    </div>
+  </li>
+</script>
+
+<script id="datetime_template" type="text/x-underscore-tmpl">
+  <li id="<@= id @>">
+    <@= _.template($("#label_template").html(),{'label':label},{}) @>
+    <@ if (note) { @>
+    <p class="finished_note"><@= note @></p>
+    <@ } @>
+    <div class="chronopicker combo input-append">
+      <input data-format="MM/dd/yyyy hh:mm:ss" type="text" class="answer"></input>
+      <span class="add-on">
+        <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+        </i>
+      </span>
+    </div>
+  </li>
+</script>
+
+
+<script id="number_template" type="text/x-underscore-tmpl">
+  <li id="<@= id @>">
+    <@= _.template($("#label_template").html(),{'label':label},{}) @>
+    <@ if (note) { @>
+    <p class="finished_note"><@= note @></p>
+    <@ } @>
+    <input type="number" step="any" class="answer" min="0" placeholder="Enter a number" />
+  </li>
+</script>
+

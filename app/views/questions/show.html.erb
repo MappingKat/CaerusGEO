@@ -1,0 +1,211 @@
+<style>
+.nav-tabs > li > a {
+font-size: 18px;
+width: 100px;
+text-align: center;
+}
+#survey-title {border-bottom:0px};
+</style>
+<div class="grid-content">
+	
+	<div id="survey-title" class="clearfix">
+		<h2><a href="<%= url_for @survey %>"><%= @survey.title %></a> > Questions > <%= @question.index %>.<%= @question.label %></h2>
+		<a class="btn  btn-warning" id="new_button" href="<%= url_for new_survey_report_path(@survey) %>">
+		   <i class="icon-plus icon-white" style="margin-right:5px"></i>New Results
+		</a>
+	</div>
+
+	<ul class="nav nav-tabs" id="tabMenu">
+	  <li><a href="<%= url_for survey_path(@survey) %>#overview">Home</a></li>
+	  <li><a href="<%= url_for survey_path(@survey) %>#report_history" id="rh">History</a></li>
+	  <li class="active"><a href="<%= url_for survey_path(@survey) %>#analyze" id="analyze_t">Analyze</a></li>
+	  <% if @survey.user == current_user %><li><a href="<%= url_for survey_path(@survey) %>#manage">Sharing</a></li><% end %>
+	</ul>
+
+<div class="row">
+	<div class="span7">
+		<div id="map" style="width:100%;height:500px;"></div>
+	</div>
+
+	<div class="span5">
+		<div class="well"><h3 style="font-style:italic"><%= @question.label %></h3></div>
+		<p>Filter map answers by this question's responses.</p>
+		<div id="sorting_box"></div>
+    <div id="d3_<%= @question.id %>"></div>
+    <% if @survey.map_has_points %>
+    <a class="btn" id="paint_colors">Paint from legend</a>
+    <% end %>
+	</div>
+</div>
+
+<div class="row">
+	<div class="span12" id="bar_area" style="margin-top:30px;"><hr>  <h3>Answer Breakdown</h3>
+  <div id="barrow"><label><input type="checkbox" id="bar_sort"> Sort values</label></div></div>
+</div>
+
+
+</div><!-- Grid Content -->
+
+<script id="sorting_template" type="text/x-underscore-tmpl">
+  <select id="<@= q_name @>" data-qid="<@= q_id @>" style="width:100%">
+    <option></option>
+    <@ _.each(answers,function(answer) { @>
+        <option value="<@= answer @>"><@= answer @></option>
+    <@ }) @>
+  </select>
+  <hr>
+</script>
+
+  <script>
+
+  //These should be in order, but here is the forcing.
+  var questions = new QuestionCollection(<%= raw @survey.questions.order(:index).to_json %>);
+
+
+  Result = Backbone.Model.extend({
+      defaults: {
+      }
+  });
+
+  var ResultCollection = Backbone.Collection.extend({
+        model: Result
+  });
+
+  function PaintFromLegend() {
+    var colors = [];
+    $("#d3_<%= @question.id %> text").each(function(index,thing) {
+      colors.push($(thing).attr('color_value'))
+    });
+    
+    var answer_hash = {}
+    $('#sorting_box option[value!=""]').each(function(index,thing) {
+      answer_hash[$(thing).val()] = colors[index];  
+    });
+    _.each(answer_hash,function(value,key) {
+      //console.log(key + " " + value)
+      var results = OpenResults.where({"Q<%= @question.index %>":key});
+      _.each(results,function(model) {
+        var entity = model.get('entity');
+        if (window.map_form=='geo_point') {
+          //entity.setIcon(window.green_icon);
+        }
+        else {
+          if (window.map_form=='geo_polygon') {
+            entity.setStyle({fillColor:value,fillOpacity:0.8}).bringToFront();
+          }
+          else {
+            entity.setStyle({color:value}).bringToFront();
+          }
+          
+        }
+      });
+
+    })
+
+  }
+
+  var OpenResults = new ResultCollection();
+
+    function GetSorts() {
+
+      //Build sort object
+      var sorted = {}
+
+      //Loop thru each select, see if a filter is applied.If so, add to object.
+      $('#sorting_box select').each(function() {
+        var value = $(this).select2('val');
+        if (value!="") {
+          sorted[$(this).attr('id')] = $(this).select2('val')
+        }
+      });
+
+      //See if a query actually exists.It's possible all the selects are on "All".
+      var query = !_.isEmpty(sorted)
+
+      //If query exists, pass it to backbone, and get results of where.
+      if (query) {
+        var results = OpenResults.where(sorted);
+      }
+      //Otherwise, just get all models.
+      else {
+        var results = OpenResults.models
+      }
+
+      //Reset any existing filter.
+      ResetSort();
+      //If there was a query, now apply it.
+      if (query) {
+        DoSort(results);
+      }
+
+  }
+
+  function ResetSort() {
+    _.each(OpenResults.models,function(model) {
+      var entity = model.get('entity');
+      if (window.map_form=='geo_point') {
+        entity.setIcon(blue_icon);
+      }
+      else {
+        entity.setStyle(regular_path);
+      }
+      
+    })
+  }
+
+  function DoSort(models) {
+    _.each(models,function(model) {
+      var entity = model.get('entity');
+      if (window.map_form=='geo_point') {
+        entity.setIcon(window.green_icon);
+      }
+      else {
+        entity.setStyle(sorted_path).bringToFront();
+      }
+    })
+  }
+
+
+
+$(document).ready(function() {
+
+  $("#paint_colors").click(function() {
+    PaintFromLegend();
+  })
+
+	var mapq = new Question(<%= raw @survey.questions.order(:index).first.to_json %>);
+
+	var map = Open.InitMapQuestion(<%= raw @survey.area.bounds.to_json %>,mapq);
+
+	window.map_form = mapq.get('form');
+
+  <% if @survey.map_has_points %>
+    <% @spresults.includes(:answers => [:points]).each do |spresult| %>
+    Open.HandleSpResult(<%= raw spresult.answers.includes(:question).to_json %>,window.map_form,OpenResults,map)
+    <% end %>
+  <% else %>
+    <% @spresults.includes(:answers => [:point]).each do |spresult| %>
+    Open.HandleSpResult(<%= raw spresult.answers.includes(:question).to_json %>,window.map_form,OpenResults,map)
+    <% end %>
+  <% end %>
+
+  
+  var answers = <%= raw @question.result_set.to_json %>;
+  var question = <%= raw @question.to_json %>;
+  Open.HandleFillInResults(question,answers);
+
+
+  $("#d3_<%= @question.id %>").on('mouseenter','text',function() {
+  	var index = $(this).attr('index_value').replace('index-','');
+  	$("select").select2('val',window.grouped[index]);
+  	GetSorts();
+  });
+
+  $("#d3_<%= @question.id %>").on('mouseout','text',function() {
+  	$("select").select2('val','');
+  	GetSorts();
+  });
+
+
+});
+</script>

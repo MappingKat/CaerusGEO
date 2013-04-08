@@ -1,0 +1,189 @@
+<% content_for :userbar do %>
+   <%= render :partial => "partials/open_breadcrumb", :locals => {:active => "add_questions", :classes => ["done", "done", "active", "pending","pending"]  } %>
+<% end %>
+<% content_for :current_page_class do %><%= @current_controller %>_<%= step.to_s %><% end %>
+
+<style>
+.muted span {font-weight:bold;}
+</style>
+
+<div class="grid-content grid-survey grid-socialperception wizard">
+	<div class="row" style="padding-bottom:20px;border:0px !important">
+	    <%= render :partial => "partials/open_wizard_subheader", :locals => {:title => "Build your Survey Schema" }  %>
+
+	    <div class="span9 ">
+			<ol id="questions" class="questions"></ol>
+      <a href="#" class="add_open" style="text-decoration:none;color:grey;font-size:15px">
+        <i class="icon-plus-sign" style="position:relative;top:2px;"></i>&nbsp;&nbsp;Add another question
+      </a>
+		</div>
+
+		<div class="span3" id="tips">
+			<p class="tip_title">Tips</p>
+        <p>
+        Specify the kind of data you are trying to record by labelling each field, then choose the appropriate field type. This will be available as a downloadable worksheet upon completion.
+        </p>
+        <p><span>'Text'</span> fields are for any kind of text</p>
+        <p><span>'Number'</span> fields are for any fields that are number values only.</p>
+        <p><span>'Date'</span> fields are for any fields that require a calendar day.</p>
+        <p><span>'Date + Time'</span> fields are for any fields that require a particular moment in time. When Calendar day and hour/minute recording is relevant.</p>
+		</div>
+	</div> 
+</div>
+
+<%= render :partial => "partials/survey_templates_for_questions", :locals => {:open => true} %>
+
+<script>
+
+    var Questions = new QuestionCollection();
+
+
+
+    $(document).ready(function() {
+
+	   	$('.add_open').click(function(event) {
+	        SocialPerception.AddQuestion('fillin');
+	        return false;
+	    });
+
+	    $("#questions").on('change','.type_selector',function(event) {
+	      Open.SwapQuestionToType($(this));
+	    })
+
+	     $("#questions").on('click','.note_checkbox',function(event) {
+	       //Handles toggling of note textareas.
+	       $(this).parent().parent().find('.note_holder').toggle();
+	     });
+
+	  <% if @survey.field_questions.count == 0 %>
+      SocialPerception.AddQuestion('fillin');
+      <% else %>
+	      Open.AddExistingQuestions(<%= raw @survey.field_questions.to_json %>);
+        SocialPerception.RepaintIndexLabels();
+      <% end %>
+     
+
+      //Init sorting of questions.
+      $( "#questions" ).sortable({
+        "stop": function(event,ui) {
+         SocialPerception.RepaintIndexLabels();//repaint labels, because position may have changed.
+        }
+      });
+      $( "#questions" ).sortable('disable'); //we disable on it.
+
+      //only enable dragging when using the drag icon.
+      //because otherwise, leaflet dragging is broken.
+      $(".move").live('mouseenter',function() {
+        $( "#questions" ).sortable('enable');
+      })
+
+      $(".move").live('mouseleave',function() {
+        $( "#questions" ).sortable('disable');
+      });
+
+      Questions.on('add',function(e) {
+        SocialPerception.RepaintIndexLabels();
+      });
+
+      Questions.on('remove',function(e) {
+        e.get('obj').remove() //remove li
+        SocialPerception.RepaintIndexLabels();
+      });
+
+      $(".trash").live('click',function() {
+
+        if ($("#questions li").length == 1) {
+          alert("You need at least one question.");
+        }
+
+        else {
+          //move up and grab entire question holder
+          var li = $(this).closest('li');
+          //find model from collection
+          var model = Questions.getByCid(li.attr('id'));
+          Questions.remove(model) //remove from collection and
+          //model.destroy(); //kill - not using before backbone wanted to actual fire the DELETE.
+          
+        }
+        return false;
+
+      });
+
+      $("#next_wizard_button").click(function() {
+
+        if (Questions.length > 15) {
+          alert('You cannot have more than 15 questions.');
+          return false;
+        }
+
+        var notes = []
+        $("input.note_checkbox:checked").each(function(){notes.push($(this).parent().parent().find('textarea').val())})
+        if (_.include(notes,"")){
+          alert('Please enter a note for any question where you have specified one.');
+          return false;
+        }
+
+        //Apply indexing now.
+        //We do this now to allow for future drag and drop rearranging!
+        $(".question_holder").each(function(index,obj) {
+          question = Questions.getByCid($(this).attr('id'))
+          question.set({'index':index});
+        });
+
+        var final_questions = _.map(Questions.models,function(question) {
+          var domref = question.get('obj');
+          var form = question.get('form');
+          var index = question.get('index');
+          var label = domref.find('.question_label').val();
+          var has_note = (domref.find('.note_checkbox').attr('checked')=='checked');
+          if (has_note) {
+            var note = domref.find('textarea').val();
+          }
+          else {
+            var note = null;
+          }
+          var newquestion = {
+            'label' : label,
+            'form' : form,
+            'index': index,
+            'note' : note
+          }
+
+          return newquestion
+        
+        });
+    
+        var labels_for_test = _.uniq(_.map(final_questions,function(question) {return question.label}));
+
+        if (labels_for_test.length!=final_questions.length) {
+          alert("You must have a unique label for each question.");
+          return false;
+        }
+
+        if (_.any(final_questions,function(question) { return (question['label']=='') })) {
+          alert('You must enter a label for all questions.');
+          return false;
+        }
+          
+        var payload = {
+          'questions' : final_questions
+        }
+        
+        $.ajax({
+            type: "PUT",
+            url: '<%= url_for wizard_path %>',
+            data: JSON.stringify(payload),
+            contentType: 'application/json',
+            error: function(response) {
+              alert('Sorry, an error occured.')
+            },
+            success: function(data,status, xhr) {
+                window.location = '<%= url_for next_wizard_path %>';
+            }
+        });
+        
+        
+      });
+
+    });
+</script>

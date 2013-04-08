@@ -1,0 +1,150 @@
+<% if @report %> 
+	<% @survey = @report.survey %>
+<% end %>
+<div class="span7" style="margin-left:0px;">
+	<h2 id="title_line" style="font-size:26px;margin-bottom:5px;"><%= link_to(survey.title,survey) %></h2>
+	<% if defined? report %>
+		<h3 style="margin-left:0px;font-weight:bold;color:black"><%= report.title %></h3>
+	<% end %>
+</div>
+<div class="span5" style="float:right;margin-top:2px;">
+	<% if @current_action!='edit' %>
+	<a class="btn btn-warning" id="new_button" data-toggle="modal" href="#uploadModal">
+		<i class="icon-plus"></i> Add Data
+	</a>
+	<% elsif @current_action=='edit' and defined? report %>	
+		<table style="float:right;">
+			<tr>
+				<td style="width:220px;padding-right:20px;">
+				<% if report.method=="u" and report.unfinished_answers_count > 0 %>
+					<label class="control-label" style="font-size:15px;">
+						<span id="completed_count"><%= @report.spresults.count-@report.unfinished_answers_count %></span> of <%= pluralize(@report.spresults.count,"entries") %> with locations
+					</label>
+					<div class="progress progress-striped progress-success">
+	 					<div class="bar" style="width: 0%;"></div>
+					</div>
+				<% end %>
+				</td>
+				<td style="vertical-align: middle;">
+					<% if report.method=='u' and report.unfinished_answers_count == 0 %>
+					<a class="btn" id="save_finish_button">Back</a>
+					<% else %>
+					<a class="btn btn-success" id="save_finish_button">Finish</a>
+					<% end %>
+				</td>
+			</tr>
+		</table>
+	<% end %>
+</div>
+
+<div class="clear"></div>
+
+<div id="overview_collapsible" <% if request.query_string !="firstview" %> style="display:none" <% end %> >
+	<div class="span4" style="margin-left: 0px;">
+		<div id="so_map"></div>
+	</div>
+
+	<div class="span7">
+
+		<dl class="dl-horizontal" style="margin-top:0px;">
+		  <dt>Location:</dt>
+		  <dd><%= survey.location %></dd>
+		    <dt>Created:</dt>
+		  <dd><%= survey.created_at.to_formatted_s(:long) %></dd>
+		    <dt>Nº of Reports</dt>
+		  <dd><%= survey.reports.count %></dd>
+		    <dt>Total Entries:</dt>
+		  <dd><%= survey.total_respondent_count %></dd>
+		    <dt>Description:</dt>
+		  <dd><%= survey.description %></dd>
+		</dl>
+		<% if @survey.user == current_user %>
+		<p style="clear:both">
+		<%= button_to "Delete this survey",  @survey, :confirm => "Are you sure you want to delete this survey?All entries will be removed.", :method => :delete ,:class => 'btn btn-mini', :style => "position: relative;top: 36px;" %>
+		</p>
+		<% end %>
+	</div>
+
+</div>
+<% ext_links = (@current_action == 'analyze' or @current_controller=='reports') %>
+<div class="clear" style="height:40px"></div>
+
+<% if !defined? report %>
+		<ul class="nav nav-tabs" style="clear:both;margin-bottom: 0px;position:relative;top:1px;" id="tabMenu">
+		  <li <% if @current_action != 'analyze' %>class="active" <% end %>>
+		  <% if ext_links %>
+		  	<a href="<%= url_for survey %>" id="rh" style="cursor:pointer">Reports</a>
+		  <% else %>
+		  	<a href="#report_history" id="rh" data-toggle="tab">Reports</a>
+		  <% end %>
+		  </li>
+		  <li <% if @current_action == 'analyze' %>class="active" <% end %>>
+		  	<% if @current_action == 'analyze' %>
+		  	<a href="#">Visualization</a>
+		  	<% else %>
+			<a href="<%= url_for survey_analyze_path(survey) %>">Visualization</a>
+		  	<% end %>
+		  </li>
+		  <% if survey.user == current_user %>
+		  <li>
+		  	<% if ext_links %>
+		  	<a href="<%= url_for survey %>#m" id="sharing">Sharing
+		  		<i class="icon-<% if @survey.public %>un<% end %>lock"></i>
+		  	</a>
+
+		  	<% else %>
+		  	<a href="#manage" data-toggle="tab" id="sharing">Sharing
+		  		<i class="icon-<% if @survey.public %>un<% end %>lock"></i>
+		  	</a>
+		  	<% end %>
+		  </li>
+		  <% end %>
+		  <li>
+		  <% if ext_links %>
+		  	<a href="<%= url_for survey %>#d" id="download_link" style="cursor:pointer">Downloads</a>
+		  <% else %>
+		  	<a href="#downloads" id="download_link" data-toggle="tab">Downloads</a>
+		  <% end %>
+		  </li>
+
+		  <a href="#" style="float:right" id="flip"><%= request.query_string !="firstview" ? '<i class="icon-chevron-down"></i><span>Show Details</span>'.html_safe : '<i class="icon-chevron-up"></i><span>Hide Details</span>'.html_safe %></a>
+
+		</ul>
+<% end %>
+
+<div id="uploadModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="uploadLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h2 id="uploadLabel">New Data Entry</h2>
+  </div>
+  <div class="modal-body">
+  		<p>
+  			<input type="text" id="report_title" placeholder="Enter Report Name" style="font-size:15px">
+  		</p>
+  		<h4 style="margin-bottom:15px;">Choose an entry method</h4>
+  		<div id="step1_report">
+  			<a class="btn btn-large" id="show_manual">Manual</a>&nbsp;&nbsp;&nbsp;
+  			<a class="btn btn-large" id="show_upload">Upload</a>
+  		</div>
+    	<div style="display:none;margin-top:20px;" id="upload_section">	
+	    	<%= form_tag(survey_reports_path(survey), :multipart => true) do %>
+	    		<%= text_field_tag 'title',nil, :class => "unshown_input" %>
+				<%= file_field_tag 'thefile',:required => true, :accept => 'text/csv', :class => "btn" %>
+				<%= submit_tag "Upload & Import", :disable_with => "Uploading...", :class => "btn-success btn"%>
+			<% end %>
+		</div>
+  </div>
+</div>
+
+<div style="display:none">
+<%= form_tag(survey_reports_path(survey)) do %>
+	<%= text_field_tag 'title' %>
+	<%= submit_tag "Upload & Import", :class => "btn-success btn", :id => "manual_form" %>
+<% end %>
+</div>
+
+<script>
+$(document).ready(function() {
+	Open.InitWhiteStrip();
+})
+</script>
