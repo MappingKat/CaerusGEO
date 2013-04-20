@@ -2,7 +2,6 @@ CaerusGeo::Application.routes.draw do
 
   resources :surveys do
       resources :open
-      #resources :questions
       resources :reports do
         resources :spresults
       end
@@ -10,12 +9,10 @@ CaerusGeo::Application.routes.draw do
   end
 
   root :to => "home#index"
-  devise_for :users
-  resources :users, :only => [:show]
 
-  #match '/find_location' => 'application#find_location', :as => :find_location, :via => :get
-  #match '/geolocate_via_ip' => 'application#geolocate_via_ip', :as => :geolocate_via_ip, :via => :get
-  #match 'surveys/:survey_id/questions/:id/answer_breakdown', :to => 'questions#answer_breakdown', :as => :survey_question_answer_breakdown, :via => :get
+  devise_for :users
+  
+  resources :users, :only => [:show]
 
   match 'surveys/:id/export_blank_results', :to => 'surveys#export_blank_results', :as => :survey_export_blank_results, :via => :get
 
