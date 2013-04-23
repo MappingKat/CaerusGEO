@@ -17,7 +17,7 @@ gem "simple_form"
 gem "wicked", ">= 0.4.0"
 gem "geocoder"
 gem "chronic", ">= 0.9.0"
-gem 'backbone-on-rails', "0.9.2.0"
+gem 'backbone-on-rails', "1.0"
 gem 'nestful'
 gem 'dalli', ">= 2.2.1"
 gem 'unicorn'
@@ -31,7 +31,7 @@ gem 'honeybadger', ">= 1.6.1"
 gem 'net-scp', "1.0.4"
 gem 'fog'
 
-group :production do 
+group :production do
 	gem 'memcachier'
 	gem "sendgrid"
 	gem 'newrelic_rpm', "~> 3.5.7.59"
