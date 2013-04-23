@@ -20,32 +20,32 @@
 			select2_options['dropdownCssClass'] = "no-search";
 
 
-		ShowWarning = () ->  
+		ShowWarning = () ->
 			$('.leaflet-control-pointsetter').popover {'placement':'bottom','title':'Error','trigger' : 'manual','content': "Please save this map question's answer first"}
 			$('.leaflet-control-pointsetter').popover 'show'
-			setTimeout () -> 
+			setTimeout () ->
 				$('.leaflet-control-pointsetter').popover('hide')
 			,3000
-		
-		
+
+
 		$("#e1").select2 select2_options
 		$("#e1").on "change", (e) ->
 			if window.dirty
 			  ShowWarning();
 			else
 			  EntryServices.LoadResult(e.val); #Load this requested answer set
-		
-		firstval = parseInt($("#e1 option[value!='']").first().val())	
+
+		firstval = parseInt($("#e1 option[value!='']").first().val())
 		$("#e1").select2 "val", firstval #Set the select2box to the first one.
 		EntryServices.LoadResult firstval  #and load it.
 
 		$("#save_finish_button").click (e) ->
 			if window.dirty
 			  ShowWarning();
-			
-			else 
+
+			else
 			  window.location = url;
-			
+
 			return false;
 		EntryServices.UpdateDrawTool(thismap);
 
@@ -58,15 +58,15 @@
 				answer = {'text':jquery_obj.find('.answer').val()};
 			else if form=='number'
 				answer = {'number':jquery_obj.find('.answer').val()};
-			else if (_.include(['date','datetime'],form)) 
+			else if (_.include(['date','datetime'],form))
 				answer = {'stamp':jquery_obj.find('.answer').val()}
 			else if (form=='geo_point' || form=='geo_polygon' || form=='geo_line' || form=='geo_circle')
 				if window.entity == undefined
 					answer = undefined;
-				else 
+				else
 					if (form=='geo_polygon' || form=='geo_line')
 						answer = {'points':window.entity.getLatLngs()}
-					else 
+					else
 						answer = {'points':[window.entity.getLatLng()]}
 			if answer
 				answer['form'] = form
@@ -118,12 +118,12 @@
 				if window.map_form=='geo_point'
 					window.entity.dragging.disable(); #The current marker is now set.Don't let it be draggable anymore
 					window.entity.setIcon(window.green_icon);
-					
-				else 
+
+				else
 					window.entity.editing.disable();
 					window.entity.dragging.disable();
 					window.entity.setStyle(sorted_path);
-					
+
 				window.entity = undefined;
 				$('#questions input[type=text]').val(''); #clear fillin questions.
 				$('#questions input[type=number]').val('');
@@ -175,7 +175,7 @@
 					if type=='geo_polygon'
 						SocialPerception.AddPolygonControl(map)
 
-					else 
+					else
 						SocialPerception.AddPolylineControl(map)
 
 					map.on 'draw:poly-created',  (e) ->
@@ -202,8 +202,8 @@
 					map.on 'drawing',(e) ->
 						$("#instructions").hide();
 						$("#pending").show();
-			else 
-				html = _.template($("#"+type+"_template").html(),template_payload,{variable:'main' });
+			else
+				html = _.template($("#"+type+"_template").html(),template_payload);
 				$(html).appendTo("#questions");
 				if method == 'uploaded'
 					question.set({'jquery_obj':$("#"+question.get('id'))});
@@ -222,13 +222,13 @@
 			points = [window.entity._latlng]
 		else
 			points = window.entity._latlngs
-		stuff = _.template $("#loc_template").html(), { points: points } , { variable: 'points' }
+		stuff = _.template $("#loc_template").html(), { points: points }
 		$("#location_data").html(stuff).show();
 	LeaveResult:(callback) ->
 		#collect answers
 		thisentry = Spresults.get window.current_spresult_id
 		_.each questions.models,(question) ->
-			this_model = _.filter thisentry.get('answers'), (answer) -> 
+			this_model = _.filter thisentry.get('answers'), (answer) ->
 				answer.question_id==question.get('id')
 			this_model = this_model[0];
 			thisform = question.get('form');
@@ -247,7 +247,7 @@
 		#Set answers from pointsetter button, get rid of collect answers.
 		#To decline changes, use previousAttributes()  -although we dont do that yet.
 
-		if (window.dirty) 
+		if (window.dirty)
 			current_model = Spresults.get(window.current_spresult_id);
 			current_model.save {}, {
 			success:() ->
@@ -268,7 +268,7 @@
 				if _.include ['geo_polygon','geo_line'], window.map_form
 					window.entity.editing.disable()
 					window.entity.setStyle(sorted_path)
-				else 
+				else
 					window.entity.setIcon window.green_icon
 
 				window.entity.dragging.disable();
@@ -280,7 +280,7 @@
 				alert('there was an error.')
 			}
 
-		else 
+		else
 			#console.log('no need - not dirty');
 
 	InitUploadedModel:()->
@@ -297,12 +297,12 @@
 
 							if (form=='fillin')
 								$("#"+q_id).find('input').val(answer['text']);
-							else if (form=='number') 
+							else if (form=='number')
 								$("#"+q_id).find('input').val(answer['number']);
-							else if (form=='date') 
+							else if (form=='date')
 								thisone = moment(answer['stamp']).format('L')
 								$("#"+q_id).find('input').val(thisone);
-							else if (form=='datetime') 
+							else if (form=='datetime')
 								this_moment = moment(answer['stamp']);
 								real_moment = moment(this_moment._a);
 								#refactor this.want to show survey's TZ
@@ -315,13 +315,13 @@
 								if form=='geo_point'
 									entity = new L.Marker([thesepoints[0].lat,thesepoints[0].lng],{icon:window.green_icon});
 									center = entity.getLatLng();
-								else if (form=='geo_polygon') 
+								else if (form=='geo_polygon')
 									entity = new L.Polygon(thesepoints);
 									center = thisCentroid(entity);
 								else if (form=='geo_line')
 									entity = new L.Polyline(thesepoints);
 									center = thisCentroid(entity);
-								
+
 								this.set {'entity':entity}
 								map.addLayer(entity);
 								map.panTo(center)
@@ -336,17 +336,17 @@
 			thisform = question.get('form')
 			if _.include ['geo_point','geo_circle','geo_polygon','geo_line'], thisform
 				entity = question.get('entity');
-				if (entity) 
+				if (entity)
 					question.get('map').removeLayer(entity); #remove current entity from map.
 					question.set({'entity':null});
-				
+
 		window.entity = false;
 
 		#set up on first execution,which is automatically off page load.
 		if !$("#questions li").length
 			EntryServices.HandleQuestionSetup(questions,'uploaded',window.area,window.grids)
 			$('input.answer').attr('disabled','disabled');
-		
+
 
 		test_grab = Spresults.get(id);
 
@@ -375,7 +375,7 @@
 				if window.entity
 					$(".leaflet-control-draw").hide 'fast'
 					EntryServices.HandleLocationData()
-				else 
+				else
 					$("#location_data").empty()
 					$(".leaflet-control-draw,#instructions").show()
 				$('.leaflet-control-pointsetter').hide 'fast'

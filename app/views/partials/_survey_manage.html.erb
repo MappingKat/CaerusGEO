@@ -85,10 +85,8 @@ $(document).ready(function() {
     },
 
     initialize: function() {
-      var self = this;
-      this.collection.bind("reset", function() {self.render();});
-      this.collection.bind("sync", function() {self.collection.fetch();});
-      this.collection.bind("remove", function() {self.collection.fetch();});
+      var collaborators = this.collection;
+      collaborators.on("reset sync destroy", this.render,this)
     },
 
     add: function() {
@@ -111,17 +109,16 @@ $(document).ready(function() {
 
     destroy: function(e) {
       var cid = $(e.target).parent().data('cid');
-      var collab = this.collection.getByCid(cid);
-      collab.destroy();
+      var collab = this.collection.get(cid);
+      collab.destroy({});
       return false;
     },
-
 
     render: function() {
       var variables = { collaborators: this.collection.models };
       var template = _.template( $("#collab_template").html(), variables );
       this.$el.html( template ); 
-      return this 
+      return this
     } 
 
   });

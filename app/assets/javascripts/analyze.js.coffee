@@ -149,7 +149,7 @@
           domref.select2('val','') #wipe out this current criteria.It may not exist anymore in this report's choices.
           domref.find('.actual').remove(); #remove existing available choices.
           
-          newchoices = _.template($("#choices_template").html(),{choices:values},{variable:'main'})
+          newchoices = _.template($("#choices_template").html(),{choices:values})
           domref.append newchoices #place new choices in
         
         else if form == 'number' 

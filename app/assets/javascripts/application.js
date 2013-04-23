@@ -25,6 +25,11 @@
 var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 var osmAttrib='Map data © openstreetmap contributors';
 
+_.templateSettings = {
+    interpolate: /\<\@\=(.+?)\@\>/gim,
+    evaluate: /\<\@(.+?)\@\>/gim
+};
+
 $(document).ready(function() {
   var bing = new L.BingLayer(window.bing_api_key);
   var green_icon = new L.Icon({
@@ -52,10 +57,7 @@ $(document).ready(function() {
     'color': '#03f'
   }
 
-_.templateSettings = {
-    interpolate: /\<\@\=(.+?)\@\>/gim,
-    evaluate: /\<\@(.+?)\@\>/gim
-};
+
 
 Question = Backbone.Model.extend({
     defaults: {
@@ -101,15 +103,15 @@ var form_to_nameset = {
 
 
 
-function validateEmail(email) { 
+function validateEmail(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
-} 
+}
 
 function thisCentroid(entity) {
   //http://stackoverflow.com/questions/9692448/how-can-you-find-the-centroid-of-a-concave-irregular-polygon-in-javascript
   var pts = _.map(entity.getLatLngs(),function(point) {
-          return {x:point.lng,y:point.lat}  
+          return {x:point.lng,y:point.lat}
   });
 
   var twicearea=0,

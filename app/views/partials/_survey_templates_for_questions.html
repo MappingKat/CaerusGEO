@@ -13,7 +13,7 @@
     <h4>Field Heading</h4>
   	 <input class="question_label" type="text" placeholder="e.g. Name, Amount of people, Build date, Time of incident" <@ if (question.label) { @> value="<@= question.label @>" <@ } @>>
     </div>
-  
+
     <div>
       <h4>Field Type</h4>
       <select class="type_selector">
@@ -28,7 +28,7 @@
       <h4>Add a Note</h4>
 
        <input type="checkbox" class="note_checkbox" <@ if (question.note) { @>checked <@ } @> >
-     
+
     </div>
      <div class="note_holder" <@ if (question.note) { @> style="display:block !important" <@ } @>>
         <textarea placeholder="Please enter your note here. Use this to help specify exactly what information you are trying to capture in this field."><@ if (question.note) { @> <@= question.note @> <@ } @></textarea>
