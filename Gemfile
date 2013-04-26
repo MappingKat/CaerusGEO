@@ -27,14 +27,14 @@ gem "select2-rails"
 gem 'squeel'
 gem 'font-awesome-rails', ">= 3.0.2"
 gem 'jbuilder'
-gem 'honeybadger', ">= 1.6.1"
+gem 'honeybadger', ">= 1.6.2"
 gem 'net-scp', "1.0.4"
 gem 'fog'
 
 group :production do 
 	gem 'memcachier'
 	gem "sendgrid"
-	gem 'newrelic_rpm', "~> 3.5.7.59"
+	gem 'newrelic_rpm', "~> 3.6.1.87"
 end
 
 group :development, :test do

@@ -96,7 +96,7 @@ GEM
     geocoder (1.1.5)
     hashery (2.1.0)
     hike (1.2.1)
-    honeybadger (1.6.1)
+    honeybadger (1.6.2)
       json
     i18n (0.6.1)
     jbuilder (1.0.2)
@@ -124,7 +124,7 @@ GEM
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-ssh (2.6.5)
-    newrelic_rpm (3.5.7.59)
+    newrelic_rpm (3.6.1.87)
     nokogiri (1.5.6)
     orm_adapter (0.4.0)
     pdf-reader (1.2.0)
@@ -245,14 +245,14 @@ DEPENDENCIES
   fog
   font-awesome-rails (>= 3.0.2)
   geocoder
-  honeybadger (>= 1.6.1)
+  honeybadger (>= 1.6.2)
   jbuilder
   jquery-rails
   jquery-ui-rails (>= 4.0)
   memcachier
   nestful
   net-scp (= 1.0.4)
-  newrelic_rpm (~> 3.5.7.59)
+  newrelic_rpm (~> 3.6.1.87)
   pg
   prawn (>= 1.0.0.rc1)
   prawnto_2
