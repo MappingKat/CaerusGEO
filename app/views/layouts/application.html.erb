@@ -21,6 +21,13 @@
 
 	<script src="//cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
 
+    <script type="text/javascript">
+    if (typeof L == 'undefined') {
+        document.write(unescape("%3Cscript src='/leaflet/leaflet.js' type='text/javascript'%3E%3C/script%3E"));
+        document.write(unescape("%3Clink rel='stylesheet' href='/leaflet/leaflet.css'%3E"));
+    }
+    </script>
+
     <%= favicon_link_tag %>
     <%= stylesheet_link_tag    "application", :media => "all" %>
     <%= javascript_include_tag "application" %>
