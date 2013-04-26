@@ -143,10 +143,9 @@
 	HandleQuestionSetup: (questions,method,area,grids) ->
 		map = null
 		_.each questions.models,(question) ->
-			type = question.get('form')
-			template_payload = question.toJSON()
-			thisform = question.get('form')
-			if thisform in ['geo_point','geo_circle','geo_polygon','geo_line']
+			form = question.get('form')
+			
+			if form in ['geo_point','geo_circle','geo_polygon','geo_line']
 				mapname = 'map';
 				osm = new L.TileLayer(osmUrl,{minZoom:0,maxZoom:18,attribution:osmAttrib});
 				map = Open.InitMapQuestion area,question,mapname,osm,true
@@ -154,11 +153,11 @@
 				zoomControl.setPosition('topright');
 				map.addControl(zoomControl);
 				GridServices.DrawAGrid(map,grids,osm);
-				entity_name = form_to_nameset[thisform].entity_name
+				entity_name = form_to_nameset[form].entity_name
 				if method == 'uploaded'
 					map.addControl(new L.Control.Pointsetter({entity_name:entity_name}));
 
-				if type == 'geo_point'
+				if form == 'geo_point'
 					SocialPerception.AddPointControl(map);
 					map.on 'draw:marker-created', (e) ->
 						map.addLayer(e.marker);
@@ -170,30 +169,30 @@
 						else
 							Open.HideDrawControls();
 							window.entity = e.marker;
-				else if type=='geo_line' or type=='geo_polygon'
+				else if form=='geo_line' or form=='geo_polygon'
 
-					if type=='geo_polygon'
+					if form=='geo_polygon'
 						SocialPerception.AddPolygonControl(map)
 
 					else
 						SocialPerception.AddPolylineControl(map)
 
 					map.on 'draw:poly-created',  (e) ->
-						map.addLayer(e.poly);
+						map.addLayer(e.poly)
 						e.poly.dragging = new L.Handler.PolyDrag(e.poly);
-						e.poly.dragging.enable();
-						e.poly.editing.enable(); #enable after-the-fact vertex editing
+						e.poly.dragging.enable()
+						e.poly.editing.enable() #enable after-the-fact vertex editing
 						e.poly.on 'dragend',() ->
 						  e.poly.editing.enable(); #enable after-the-fact vertex editing
 
 
 						if method == 'uploaded'
 							Open.HandleCreatedEntity(question,e.poly);
-							$("#pending").hide();
-							$("#ready").show();
+							$("#pending").hide()
+							$("#ready").show()
 						else
-							Open.HideDrawControls();
-							window.entity = e.poly;
+							Open.HideDrawControls()
+							window.entity = e.poly
 
 				#question.set {'map':map}
 
@@ -203,16 +202,17 @@
 						$("#instructions").hide();
 						$("#pending").show();
 			else
-				html = _.template($("#"+type+"_template").html(),template_payload);
-				$(html).appendTo("#questions");
+				template_payload = question.toJSON()
+				html = _.template($("#"+form+"_template").html(),template_payload)
+				$(html).appendTo("#questions")
 				if method == 'uploaded'
-					question.set({'jquery_obj':$("#"+question.get('id'))});
+					question.set({'jquery_obj':$("#"+question.get('id'))})
 				else
-					if question.get('form') == 'date'
+					if form == 'date'
 						chrono_options = {pickTime: false}
-						$('#'+ question.get('id') + ' .chronopicker').datetimepicker(chrono_options);
+						$('#'+ question.get('id') + ' .chronopicker').datetimepicker chrono_options
 
-					else if question.get('form') == 'datetime'
+					else if form == 'datetime'
 						chrono_options = {}
 						$('#'+ question.get('id') + ' .chronopicker').datetimepicker chrono_options
 		return map

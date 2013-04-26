@@ -170,14 +170,8 @@
 			newQuestion.set({obj:$("#"+newQuestion.cid)});
 			$("#"+newQuestion.cid).find('select').val(question.form)
 	SwapQuestionToType: (domref) ->
-	    new_type = domref.val()
-	    #target_template = new_type+"_template"
-	    #target_area = $(domref).parent().find('.type_area')
-	    #html = _.template($("#"+target_template).html(),{})
-	    #target_area.html html
-
 	    model = Questions.get($(domref).closest('li').attr('id'))
-	    model.set({form:new_type})
+	    model.set({form:domref.val()})
 	AddFinishedEntityGroup:(map, entityGroup,map_form) ->
 		map.addLayer(entityGroup); #Add the created entity group
 
