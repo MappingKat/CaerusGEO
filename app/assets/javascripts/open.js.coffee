@@ -192,6 +192,11 @@
 
 	InitEntryDisplay:(url)->
 		#Sets up a new Collection to query from the correct endpoint.
+		Spresult = Backbone.Model.extend({});
+
+		SpresultQueryableCollection = Backbone.QueryCollection.extend({
+		    model: Spresult
+		});
 		Spresults = new SpresultQueryableCollection();
 		Spresults.url = url;
 

@@ -57,30 +57,11 @@ $(document).ready(function() {
     'color': '#03f'
   }
 
-
-
-Question = Backbone.Model.extend({
-    defaults: {
-    },
-    initialize: function(){
-    }
-});
+Question = Backbone.Model.extend({});
 
 var QuestionCollection = Backbone.Collection.extend({
       model: Question
 });
-
-Spresult = Backbone.Model.extend({});
-
-SpresultCollection = Backbone.Collection.extend({
-    model: Spresult
-});
-
-SpresultQueryableCollection = Backbone.QueryCollection.extend({
-    model: Spresult
-});
-
-
 
 var form_to_noun = {
   "geo_point" : "Markers",
@@ -100,8 +81,6 @@ var form_to_nameset = {
  control_name :"Area",
  pending_text :"Draw points to create area."}
 }
-
-
 
 function validateEmail(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
