@@ -1,4 +1,4 @@
-@Open = 
+@Open =
 	HandleOpenSet: (result,questionForm,entityGroup,choice_hash,form_hash) ->
 		#ensures the map question is first.
 		set = _.sortBy result.get('answers'),(sort) -> sort['question_id'] #really want to do this DB side instead.
@@ -6,7 +6,7 @@
 		other_answers = set[1..] #get all others
 		#only proceed if this question has been answered.
 		if map_question.points.length
-			
+
 			if questionForm == 'geo_point'
 				point = map_question.points.pop()
 				entity = new L.Marker(new L.LatLng(point.lat,point.lng))
@@ -14,13 +14,13 @@
 				entity = new L.Polygon map_question.points
 			else if questionForm == 'geo_line'
 				entity = new L.Polyline map_question.points
-			#else if questionForm=='geo_circle' 
+			#else if questionForm=='geo_circle'
 			#	entity = new L.Circle(new L.LatLng(map_question.point.lat,map_question.point.lng),map_question.content.radius);
 
 			result.set({
 			  	entity: entity
 				});
-			
+
 			prepped_lines = []
 			backbone_options_hash = {}
 			for answer in other_answers
@@ -146,7 +146,7 @@
 	QuestionIsUnfinished: (answer) ->
 		if answer is undefined
 			return true
-		else 
+		else
 			switch answer.form
 				when "fillin" then test = (answer.text=="")
 				when "number" then test =  (answer.number=="")
@@ -160,14 +160,14 @@
 			q_to_pass = newQuestion.toJSON()
 			q_to_pass.cid = newQuestion.cid
 			#template and append
-			html = _.template($("#base_template").html(),{question:q_to_pass},{variable:'main' });
+			html = _.template($("#base_template").html(),{question:q_to_pass});
 			$(html).appendTo("#questions");
 
 			#make active and show
 			$("#"+newQuestion.cid).show();
 
 			#/tie new model instance to templated dom object.
-			newQuestion.set({obj:$("#"+newQuestion.cid)}); 
+			newQuestion.set({obj:$("#"+newQuestion.cid)});
 			$("#"+newQuestion.cid).find('select').val(question.form)
 	SwapQuestionToType: (domref) ->
 	    new_type = domref.val()
@@ -176,7 +176,7 @@
 	    #html = _.template($("#"+target_template).html(),{})
 	    #target_area.html html
 
-	    model = Questions.getByCid($(domref).closest('li').attr('id'))
+	    model = Questions.get($(domref).closest('li').attr('id'))
 	    model.set({form:new_type})
 	AddFinishedEntityGroup:(map, entityGroup,map_form) ->
 		map.addLayer(entityGroup); #Add the created entity group
@@ -185,26 +185,26 @@
 
 		#pans on map entity clicks
 		entityGroup.on 'click', (e) ->
-			if map_form=='geo_point' 
+			if map_form=='geo_point'
 			  map.panTo(e.layer.getLatLng());
-			else 
+			else
 			  map.panTo(thisCentroid(e.layer));
 
 	InitEntryDisplay:(url)->
 		#Sets up a new Collection to query from the correct endpoint.
 		Spresults = new SpresultQueryableCollection();
 		Spresults.url = url;
-		
+
 		return Spresults
 	HandleFetchedEntries:(map,Spresults,entityGroup,map_form,choice_hash,form_hash) ->
 		#Called directly after a sucessful fetch.
 
 
-		entityGroup.clearLayers() 
+		entityGroup.clearLayers()
 
 		for result in Spresults.models
 			Open.HandleOpenSet(result,map_form,entityGroup,choice_hash,form_hash);
-			
+
 		return Spresults
 
 	GetFormsForFields:(questions) ->
@@ -220,7 +220,7 @@
 			other_answers = set[1..] #get all others
 			#only proceed if this question has been answered.
 			if map_question.points.length
-				
+
 				if questionForm == 'geo_point'
 					point = map_question.points.pop()
 					entity = new L.Marker(new L.LatLng(point.lat,point.lng),{icon:window.green_icon})
@@ -228,7 +228,7 @@
 					entity = new L.Polygon map_question.points,sorted_path
 				else if questionForm == 'geo_line'
 					entity = new L.Polyline map_question.points,sorted_path
-				
+
 				prepped_lines = []
 				for answer in other_answers
 					form = form_hash[answer.question_id]
@@ -251,20 +251,20 @@
 				string = prepped_lines.join '<br>'
 				entity.bindLabel string
 				entityGroup.addLayer entity
-			map.addLayer entityGroup 
+			map.addLayer entityGroup
 	InitWhiteStrip:() ->
 		$("#show_upload").click =>
-			if ($("#report_title").val()=="") 
+			if ($("#report_title").val()=="")
 				alert("Enter a report title")
-			
-			else 
+
+			else
 				$('input[name=title]').val($("#report_title").val())
 				$('#step1_report').hide()
 				$("#upload_section").slideDown('fast')
-			
+
 
 		$("#show_manual").click =>
-			if ($("#report_title").val()=="") 
+			if ($("#report_title").val()=="")
 				alert("Enter a report title")
 			else
 				$('input[name=title]').val($("#report_title").val())
@@ -276,14 +276,14 @@
 
 		$("#flip").click =>
 			thisdomref = $("#flip")
-			if (thisdomref.find('span').text()=='Show Details') 
+			if (thisdomref.find('span').text()=='Show Details')
 				$("#overview_collapsible").slideDown 'slow', =>
 					window.so_map.invalidateSize();
 					window.so_map.fitBounds(bounds);
 				thisdomref.find('span').text('Hide Details');
 				$("#flip i").removeClass('icon-chevron-down').addClass('icon-chevron-up');
-			
-			else 
+
+			else
 				$("#overview_collapsible").slideUp('slow');
 				thisdomref.find('span').text('Show Details');
 				$("#flip i").removeClass('icon-chevron-up').addClass('icon-chevron-down');
@@ -304,4 +304,3 @@
   		Collaborators.reset(existing_collaborators);
 		$("#survey_public").click =>
     		$('#public_save').slideDown('fast');
-  					

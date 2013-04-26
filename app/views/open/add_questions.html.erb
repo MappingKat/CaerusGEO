@@ -28,7 +28,7 @@
         <p><span>'Date'</span> fields are for any fields that require a calendar day.</p>
         <p><span>'Date + Time'</span> fields are for any fields that require a particular moment in time. When Calendar day and hour/minute recording is relevant.</p>
 		</div>
-	</div> 
+	</div>
 </div>
 
 <%= render :partial => "partials/survey_templates_for_questions", :locals => {:open => true} %>
@@ -61,7 +61,7 @@
 	      Open.AddExistingQuestions(<%= raw @survey.field_questions.to_json %>);
         SocialPerception.RepaintIndexLabels();
       <% end %>
-     
+
 
       //Init sorting of questions.
       $( "#questions" ).sortable({
@@ -100,10 +100,10 @@
           //move up and grab entire question holder
           var li = $(this).closest('li');
           //find model from collection
-          var model = Questions.getByCid(li.attr('id'));
+          var model = Questions.get(li.attr('id'));
           Questions.remove(model) //remove from collection and
           //model.destroy(); //kill - not using before backbone wanted to actual fire the DELETE.
-          
+
         }
         return false;
 
@@ -126,7 +126,7 @@
         //Apply indexing now.
         //We do this now to allow for future drag and drop rearranging!
         $(".question_holder").each(function(index,obj) {
-          question = Questions.getByCid($(this).attr('id'))
+          question = Questions.get($(this).attr('id'))
           question.set({'index':index});
         });
 
@@ -150,9 +150,9 @@
           }
 
           return newquestion
-        
+
         });
-    
+
         var labels_for_test = _.uniq(_.map(final_questions,function(question) {return question.label}));
 
         if (labels_for_test.length!=final_questions.length) {
@@ -164,11 +164,11 @@
           alert('You must enter a label for all questions.');
           return false;
         }
-          
+
         var payload = {
           'questions' : final_questions
         }
-        
+
         $.ajax({
             type: "PUT",
             url: '<%= url_for wizard_path %>',
@@ -181,8 +181,8 @@
                 window.location = '<%= url_for next_wizard_path %>';
             }
         });
-        
-        
+
+
       });
 
     });
