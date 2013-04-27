@@ -158,7 +158,7 @@
 					map.addControl(new L.Control.Pointsetter({entity_name:entity_name}));
 
 				if form == 'geo_point'
-					SocialPerception.AddPointControl(map);
+					EntryServices.AddPointControl(map)
 					map.on 'draw:marker-created', (e) ->
 						map.addLayer(e.marker);
 						e.marker.dragging.enable();
@@ -172,10 +172,10 @@
 				else if form=='geo_line' or form=='geo_polygon'
 
 					if form=='geo_polygon'
-						SocialPerception.AddPolygonControl(map)
+						EntryServices.AddPolygonControl(map)
 
 					else
-						SocialPerception.AddPolylineControl(map)
+						EntryServices.AddPolylineControl(map)
 
 					map.on 'draw:poly-created',  (e) ->
 						map.addLayer(e.poly)
@@ -381,3 +381,49 @@
 				$('.leaflet-control-pointsetter').hide 'fast'
 		}
 		return obj
+	AddPolylineControl: (map) ->
+		drawControl = new L.Control.Draw {
+		polygon: false,
+		circle: false,
+		rectangle: false,
+		marker: false,
+		polyline:{
+		  title: 'Draw your polyline.',
+		  allowIntersection: false,
+		  drawError: {
+		    color: '#b00b00',
+		    timeout: 1000
+		  },
+		  shapeOptions: {
+		    color: '#000000'
+		  }
+		}
+		}
+		map.addControl drawControl
+	AddPointControl: (map) ->
+		drawControl = new L.Control.Draw({
+		polygon: false,
+		circle: false,
+		rectangle: false,
+		polyline:false
+		})
+		map.addControl drawControl
+	AddPolygonControl: (map) ->
+		drawControl = new L.Control.Draw({
+			polygon: {
+				title: 'Draw your polygon.',
+				allowIntersection: false,
+				drawError: {
+					color: '#b00b00',
+					timeout: 1000
+				},
+				shapeOptions: {
+					color: '#000000'
+				}
+			},
+			circle: false,
+			rectangle: false,
+			marker: false,
+			polyline:false
+		})
+		map.addControl drawControl
