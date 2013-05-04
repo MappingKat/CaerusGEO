@@ -195,14 +195,12 @@
 		Spresults.url = url;
 
 		return Spresults
-	HandleFetchedEntries:(map,Spresults,entityGroup,map_form,choice_hash,form_hash) ->
+	HandleFetchedEntries:(Spresults,entityGroup,map_form,choice_hash,form_hash) ->
 		#Called directly after a sucessful fetch.
-
-
 		entityGroup.clearLayers()
 
 		for result in Spresults.models
-			Open.HandleOpenSet(result,map_form,entityGroup,choice_hash,form_hash);
+			Open.HandleOpenSet(result,map_form,entityGroup,choice_hash,form_hash)
 
 		return Spresults
 

@@ -37,7 +37,7 @@
       Spresults.fetch {
         success: =>
           $("#entry_loader").hide();
-          OpenResults = Open.HandleFetchedEntries(map,Spresults,entityGroup,window.map_form,choice_hash,form_hash);
+          OpenResults = Open.HandleFetchedEntries(Spresults,entityGroup,window.map_form,choice_hash,form_hash);
           if OpenResults.models.length > 0
             $("#available_count").text(OpenResults.models.length)
             Analyze.UpdateFilters(OpenResults,questions);
