@@ -18,16 +18,6 @@ class ReportsController < ApplicationController
     #redirect_to survey_path(@report.survey)+"#report_history"
   end
 
-  def show
-    #not in use
-    #@report = Report.includes(:survey => {:area => [{:grids => [:ne,:sw]}]}).find(params[:id])
-
-    #respond_to do |format|
-    #  format.html # show.html.erb
-    #  format.json { render json: @report }
-    #end
-  end
-
   # GET /reports/1/edit
   def edit
     if @report.user != current_user
