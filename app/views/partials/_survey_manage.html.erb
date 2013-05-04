@@ -86,7 +86,8 @@ $(document).ready(function() {
 
     initialize: function() {
       var collaborators = this.collection;
-      collaborators.on("reset sync destroy", this.render,this)
+      collaborators.on("reset sync destroy", this.render,this);
+      this.render();
     },
 
     add: function() {

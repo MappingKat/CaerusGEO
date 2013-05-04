@@ -292,13 +292,12 @@
 			url: url
 		 });
 
-		Collaborators = new CollaboratorCollection()
+		Collaborators = new CollaboratorCollection(existing_collaborators)
 
 		CView = new ManagementSection({
     		collection: Collaborators
   		});
 
-  		Collaborators.reset(existing_collaborators);
 		$("#survey_public").click =>
     		$('#public_save').slideDown('fast');
 	RepaintIndexLabels: ->
