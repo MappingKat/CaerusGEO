@@ -24,7 +24,7 @@
       for model in models
         entity = model.get 'entity'
         entity.setStyle {"opacity":0.6,"fillOpacity":0.5}
-  LoadData:(val,survey_path,reports_path,entityGroup,heatmapLayer,choice_hash,form_hash,questions) ->
+  LoadData:(val,survey_path,reports_path,entityGroup,choice_hash,form_hash,questions) ->
       $("#entry_loader").show();
       if val=='All'
         Spresults = Open.InitEntryDisplay(survey_path)
@@ -124,6 +124,7 @@
         opacity: 0.8
       })
       window.layer_c.addOverlay(heatmapLayer,"Heatmap")
+      window.heatmap = heatmapLayer
     else
       heatmapLayer = {}
     return heatmapLayer

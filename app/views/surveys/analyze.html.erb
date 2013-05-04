@@ -91,7 +91,7 @@ $(document).ready(function() {
   var entityGroup = new L.FeatureGroup();
 
   var heatmapLayer = Analyze.SetUpHeatMap(map_form);
-  window.heatmap = heatmapLayer;
+  
   var choice_hash = Open.GetLabelsForFields(questions.toJSON());
   var form_hash = Open.GetFormsForFields(questions.toJSON());
 
@@ -100,7 +100,7 @@ $(document).ready(function() {
   Analyze.InitFilters(questions);
 
   $("#source_selector").select2({placeholder:"All",dropdownCssClass:"no-search"}).on("change", function(e) {
-    Analyze.LoadData(e.val,survey_all_entries_path,report_all_entries_path,entityGroup,heatmapLayer,choice_hash,form_hash,questions); 
+    Analyze.LoadData(e.val,survey_all_entries_path,report_all_entries_path,entityGroup,choice_hash,form_hash,questions); 
   });
 
   var survey_all_entries_path = '<%= url_for survey_all_entries_path(@survey) %>';
@@ -109,7 +109,7 @@ $(document).ready(function() {
   if (initial_grab!='All') {
     $("#source_selector").select2('val',initial_grab);
   }
-  Analyze.LoadData(initial_grab,survey_all_entries_path,report_all_entries_path,entityGroup,heatmapLayer,choice_hash,form_hash,questions);
+  Analyze.LoadData(initial_grab,survey_all_entries_path,report_all_entries_path,entityGroup,choice_hash,form_hash,questions);
 
 });
 </script>
