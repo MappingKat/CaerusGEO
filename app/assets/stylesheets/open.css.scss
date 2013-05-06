@@ -85,4 +85,9 @@
 .breadcrumbs li.done { background-image:asset-url('breadcrumbs_done.png',image); }
 .breadcrumbs li.active { background-image:asset-url('breadcrumbs_active.png',image); }
 .breadcrumbs li.pending { background-image:asset-url('breadcrumbs_pending.png',image); }
+.breadcrumbs li .icon { margin: 24px 0 10px 0; text-align: center; font-weight: bold; color: white; font-size: 14px; }
+.breadcrumbs li .icon i { display: inline-block; }
+.breadcrumbs span { color: #a6a8ab; font-weight: normal; font-size: 12px;}
+.breadcrumbs li.active span { color: #83c34d; }
 #subheader {border-bottom: thin solid silver;height: 55px;margin-bottom:20px}
+
