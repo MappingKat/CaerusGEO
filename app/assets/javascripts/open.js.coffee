@@ -104,25 +104,6 @@
 				when "date" then test = (answer.stamp=="")
 				when "datetime" then test = (answer.stamp=="")
 			return test
-	AddExistingQuestions: (questions) ->
-		for question in questions
-			newQuestion = new Question(question);
-			Questions.add([newQuestion]);
-			q_to_pass = newQuestion.toJSON()
-			q_to_pass.cid = newQuestion.cid
-			#template and append
-			html = _.template($("#base_template").html(),{question:q_to_pass});
-			$(html).appendTo("#questions");
-
-			#make active and show
-			$("#"+newQuestion.cid).show();
-
-			#/tie new model instance to templated dom object.
-			newQuestion.set({obj:$("#"+newQuestion.cid)});
-			$("#"+newQuestion.cid).find('select').val(question.form)
-	SwapQuestionToType: (domref) ->
-	    model = Questions.get($(domref).closest('li').attr('id'))
-	    model.set({form:domref.val()})
 	AddFinishedEntityGroup:(map, entityGroup,map_form) ->
 		map.addLayer(entityGroup); #Add the created entity group
 
@@ -217,28 +198,6 @@
 
 		$("#survey_public").click =>
     		$('#public_save').slideDown('fast');
-	RepaintIndexLabels: ->
-		$('.num').each (index,obj) =>
-			$(obj).find('span').text((index+1))
-	AddQuestion: (form) ->
-		#prep new model instance & add to collection
-		newQuestion = new Question({'form':form});
-		Questions.add([newQuestion])
-		q_to_pass = newQuestion.toJSON()
-		q_to_pass.cid = newQuestion.cid
-
-		#template and append
-		html = _.template($("#base_template").html(),{question:newQuestion});
-		$(html).appendTo("#questions");
-
-		#make active and show
-		$("#"+newQuestion.cid).addClass('active_question').show();
-
-		#tie new model instance to templated dom object.
-		newQuestion.set({obj:$("#"+newQuestion.cid)})
-		Questions.trigger('add') #we trigger again, since LI is now available.
-		#$("#"+newQuestion.cid).ScrollTo {duration: 1000, easing: 'linear'}
-
 	HandleUnifiedSet: (entry,questionForm,choice_hash,form_hash,prepareQueryHash,entityGroup,marker_opts,poly_opts) ->
 		set = entry.get('answers') #sorting by question id is done at DB level.
 		map_question = set[0] #geo is always first in open.

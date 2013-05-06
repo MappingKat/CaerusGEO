@@ -42,12 +42,12 @@
     $(document).ready(function() {
 
 	   	$('.add_open').click(function(event) {
-	        Open.AddQuestion('fillin');
+	        Wizard.AddQuestion('fillin');
 	        return false;
 	    });
 
 	    $("#questions").on('change','.type_selector',function(event) {
-	      Open.SwapQuestionToType($(this));
+	      Wizard.SwapQuestionToType($(this));
 	    })
 
 	     $("#questions").on('click','.note_checkbox',function(event) {
@@ -56,17 +56,17 @@
 	     });
 
 	  <% if @survey.field_questions.count == 0 %>
-      Open.AddQuestion('fillin');
+      Wizard.AddQuestion('fillin');
       <% else %>
-	      Open.AddExistingQuestions(<%= raw @survey.field_questions.to_json %>);
-        Open.RepaintIndexLabels();
+        Wizard.AddExistingQuestions(<%= raw @survey.field_questions.to_json %>);
+        Wizard.RepaintIndexLabels();
       <% end %>
 
 
       //Init sorting of questions.
       $( "#questions" ).sortable({
         "stop": function(event,ui) {
-         Open.RepaintIndexLabels();//repaint labels, because position may have changed.
+         Wizard.RepaintIndexLabels();//repaint labels, because position may have changed.
         }
       });
       $( "#questions" ).sortable('disable'); //we disable on it.
@@ -82,12 +82,12 @@
       });
 
       Questions.on('add',function(e) {
-        Open.RepaintIndexLabels();
+        Wizard.RepaintIndexLabels();
       });
 
       Questions.on('remove',function(e) {
         e.get('obj').remove() //remove li
-        Open.RepaintIndexLabels();
+        Wizard.RepaintIndexLabels();
       });
 
       $(".trash").live('click',function() {
