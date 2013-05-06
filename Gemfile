@@ -30,6 +30,8 @@ gem 'jbuilder'
 gem 'honeybadger', ">= 1.6.2"
 gem 'net-scp', "1.0.4"
 gem 'fog'
+gem 'oj'
+gem 'multi_json', "1.7.2"
 
 group :production do
 	gem 'memcachier'
