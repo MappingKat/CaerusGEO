@@ -3,10 +3,6 @@
 <% end %>
 <% content_for :current_page_class do %><%= @current_controller %>_<%= step.to_s %><% end %>
 
-<style>
-.muted span {font-weight:bold;}
-</style>
-
 <div class="grid-content grid-survey grid-socialperception wizard">
 	<div class="row" style="padding-bottom:20px;border:0px !important">
 	    <%= render :partial => "partials/open_wizard_subheader", :locals => {:title => "Build your Survey Schema" }  %>
@@ -36,8 +32,6 @@
 <script>
 
     var Questions = new QuestionCollection();
-
-
 
     $(document).ready(function() {
 
@@ -136,12 +130,8 @@
           var index = question.get('index');
           var label = domref.find('.question_label').val();
           var has_note = (domref.find('.note_checkbox').attr('checked')=='checked');
-          if (has_note) {
-            var note = domref.find('textarea').val();
-          }
-          else {
-            var note = null;
-          }
+          var note = has_note ? domref.find('textarea').val() : null;
+
           var newquestion = {
             'label' : label,
             'form' : form,
