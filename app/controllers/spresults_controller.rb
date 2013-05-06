@@ -10,7 +10,7 @@ class SpresultsController < ApplicationController
   def index
   	@report = Report.find(params[:report_id])
   	#respond_with @report.spresults.map(&:id)
-    respond_with @report.spresults.includes(:answers => [:points])
+    respond_with @report.spresults.order{answers.question_id}.includes(:answers => [:points])
   end
 
   def show

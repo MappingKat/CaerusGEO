@@ -1,56 +1,7 @@
 @Open =
 	HandleOpenSet: (result,questionForm,entityGroup,choice_hash,form_hash) ->
-		#ensures the map question is first.
-		set = _.sortBy result.get('answers'),(sort) -> sort['question_id'] #really want to do this DB side instead.
-		map_question = set[0] #geo is always first in open.
-		other_answers = set[1..] #get all others
-		#only proceed if this question has been answered.
-		if map_question.points.length
-
-			if questionForm == 'geo_point'
-				point = map_question.points.pop()
-				entity = new L.Marker(new L.LatLng(point.lat,point.lng))
-			else if questionForm == 'geo_polygon'
-				entity = new L.Polygon map_question.points
-			else if questionForm == 'geo_line'
-				entity = new L.Polyline map_question.points
-			#else if questionForm=='geo_circle'
-			#	entity = new L.Circle(new L.LatLng(map_question.point.lat,map_question.point.lng),map_question.content.radius);
-
-			result.set({
-			  	entity: entity
-				});
-
-			prepped_lines = []
-			backbone_options_hash = {}
-			for answer in other_answers
-				form = form_hash[answer.question_id]
-
-				switch form
-					when 'fillin'
-						this_answer = answer.text
-						bb_answer = this_answer
-					when 'number'
-						this_answer = answer.number
-						bb_answer = this_answer
-					when 'date'
-						this_moment = moment(answer.stamp)
-						this_answer = this_moment.format('L')
-						bb_answer = this_moment.unix()
-					when 'datetime'
-						this_moment = moment(answer.stamp)
-						real_moment = moment(this_moment._a)
-						#refactor this.want to show survey's TZ
-						this_answer = real_moment.format('L LT')+' ' + window.tz_abbr
-						bb_answer = real_moment.unix()
-
-
-				prepped_lines.push "<i>"+choice_hash[answer.question_id]+"</i>: " + this_answer
-				backbone_options_hash["Q"+answer.question_id] = bb_answer
-			result.set backbone_options_hash
-			string = prepped_lines.join '<br>'
-			entity.bindLabel string
-			entityGroup.addLayer entity
+		#called from Analyze.
+		return Open.HandleUnifiedSet(result,questionForm,choice_hash,form_hash,true,entityGroup) 
 	InitFilter: (question_id) ->
 		select2_options = {placeholder: "All",allowClear: true}
 		#dont show the autocompleting search unless there are enough results
@@ -210,45 +161,11 @@
 			hash[question.id] = question.form
 		return hash
 	HandleExistingManualSet: (collection,questionForm,choice_hash,form_hash,map) ->
+		#Called from Manual Edit.
 		entityGroup = new L.LayerGroup()
 		_.each collection.models, (entry) ->
-			set = _.sortBy entry.get('answers'),(sort) -> sort['question_id']
-			map_question = set[0] #geo is always first in open.
-			other_answers = set[1..] #get all others
-			#only proceed if this question has been answered.
-			if map_question.points.length
-
-				if questionForm == 'geo_point'
-					point = map_question.points.pop()
-					entity = new L.Marker(new L.LatLng(point.lat,point.lng),{icon:window.green_icon})
-				else if questionForm == 'geo_polygon'
-					entity = new L.Polygon map_question.points,sorted_path
-				else if questionForm == 'geo_line'
-					entity = new L.Polyline map_question.points,sorted_path
-
-				prepped_lines = []
-				for answer in other_answers
-					form = form_hash[answer.question_id]
-
-					switch form
-						when 'fillin'
-							this_answer = answer.text
-						when 'number'
-							this_answer = answer.number
-						when 'date'
-							this_answer = moment(answer.stamp).format('L')
-						when 'datetime'
-							this_moment = moment(answer.stamp)
-							real_moment = moment(this_moment._a)
-							#refactor this.want to show survey's TZ
-							this_answer = real_moment.format('L LT')+' ' + window.tz_abbr
-
-
-					prepped_lines.push "<i>"+choice_hash[answer.question_id]+"</i>: " + this_answer
-				string = prepped_lines.join '<br>'
-				entity.bindLabel string
-				entityGroup.addLayer entity
-			map.addLayer entityGroup
+			Open.HandleUnifiedSet(entry,questionForm,choice_hash,form_hash,false,entityGroup,{icon:window.green_icon},sorted_path) 
+		map.addLayer entityGroup
 	InitWhiteStrip:() ->
 		$("#show_upload").click =>
 			if ($("#report_title").val()=="")
@@ -321,3 +238,58 @@
 		newQuestion.set({obj:$("#"+newQuestion.cid)})
 		Questions.trigger('add') #we trigger again, since LI is now available.
 		#$("#"+newQuestion.cid).ScrollTo {duration: 1000, easing: 'linear'}
+
+	HandleUnifiedSet: (entry,questionForm,choice_hash,form_hash,prepareQueryHash,entityGroup,marker_opts,poly_opts) ->
+		set = entry.get('answers') #sorting by question id is done at DB level.
+		map_question = set[0] #geo is always first in open.
+		other_answers = set[1..] #get all others
+
+		if questionForm == 'geo_point'
+			point = map_question.points.pop()
+			entity = new L.Marker(new L.LatLng(point.lat,point.lng),marker_opts)
+		else if questionForm == 'geo_polygon'
+			entity = new L.Polygon map_question.points, poly_opts
+		else if questionForm == 'geo_line'
+			entity = new L.Polyline map_question.points, poly_opts
+	
+		prepped_lines = []
+		if prepareQueryHash
+			entry.set({
+		  	entity: entity
+			})
+			backbone_options_hash = {}
+		for answer in other_answers
+			form = form_hash[answer.question_id]
+
+			switch form
+				when 'fillin'
+					this_answer = answer.text
+					if prepareQueryHash
+						bb_answer = this_answer
+				when 'number'
+					this_answer = answer.number
+					if prepareQueryHash
+						bb_answer = this_answer
+				when 'date'
+					this_moment = moment(answer.stamp)
+					this_answer = this_moment.format('L')
+					if prepareQueryHash
+						bb_answer = this_moment.unix()
+				when 'datetime'
+					this_moment = moment(answer.stamp)
+					real_moment = moment(this_moment._a)
+					#refactor this.want to show survey's TZ
+					this_answer = real_moment.format('L LT')+' ' + window.tz_abbr
+					if prepareQueryHash
+						bb_answer = real_moment.unix()
+
+
+			prepped_lines.push "<i>"+choice_hash[answer.question_id]+"</i>: " + this_answer
+			if prepareQueryHash
+				backbone_options_hash["Q"+answer.question_id] = bb_answer
+		if prepareQueryHash
+			entry.set backbone_options_hash
+		string = prepped_lines.join '<br>'
+		entity.bindLabel string
+		entityGroup.addLayer entity
+		return entry

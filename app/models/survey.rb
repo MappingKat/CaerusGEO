@@ -172,7 +172,7 @@ class Survey < ActiveRecord::Base
 
   def all_entries
     rids = reports
-    Spresult.where{report_id.in(rids.select{id})}.where(:status => true).includes(:answers => [:points])
+    Spresult.where{report_id.in(rids.select{id})}.where(:status => true).order{spresult.answers.question_id}.includes(:answers => [:points])
   end
 
   def slugify_title

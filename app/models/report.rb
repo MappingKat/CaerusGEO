@@ -17,7 +17,7 @@ class Report < ActiveRecord::Base
   end
 
   def all_entries
-    return spresults.where(:status => true).includes(:answers => [:points])
+    return spresults.where(:status => true).order{spresult.answers.question_id}.includes(:answers => [:points])
   end
 
   def finished_answers_count
