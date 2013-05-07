@@ -1,6 +1,8 @@
 <script id="base_template" type="text/x-underscore-tmpl">
+    <@ _.each(questions,function(question,index) { @>
+
   <li class="question_holder" id="<@= question.cid @>">
-  	<label class="num" style="font-size:18px"><span>1</span></label>
+  	<label class="num" style="font-size:18px"><span><@= index+1 @></span></label>
     <div class="q_menu">
       <div class="btn-toolbar">
         <div class="btn-group">
@@ -11,27 +13,28 @@
     </div>
     <div class="type_area">
     <h4>Field Heading</h4>
-  	 <input class="question_label" type="text" placeholder="e.g. Name, Amount of people, Build date, Time of incident" <@ if (question.label) { @> value="<@= question.label @>" <@ } @>>
+  	 <input class="question_label" type="text" placeholder="e.g. Name, Amount of people, Build date, Time of incident" <@ if (question.get('label')) { @> value="<@= question.get('label') @>" <@ } @>>
     </div>
 
     <div>
       <h4>Field Type</h4>
       <select class="type_selector">
-        <option value="fillin">Text</option>
-        <option value="number">Number</option>
-        <option value="date">Date</option>
-        <option value="datetime">Date + Time</option>
+        <option value="fillin" <@ if (question.get('form')=='fillin') { @>selected <@ } @>>Text</option>
+        <option value="number" <@ if (question.get('form')=='number') { @>selected <@ } @>>Number</option>
+        <option value="date" <@ if (question.get('form')=='date') { @>selected <@ } @>>Date</option>
+        <option value="datetime" <@ if (question.get('form')=='datetime') { @>selected <@ } @>>Date + Time</option>
       </select>
     </div>
 
     <div class="note_section" style="height:25px">
       <h4>Add a Note</h4>
 
-       <input type="checkbox" class="note_checkbox" <@ if (question.note) { @>checked <@ } @> >
+       <input type="checkbox" class="note_checkbox" <@ if (question.get('note')) { @>checked <@ } @> >
 
     </div>
-     <div class="note_holder" <@ if (question.note) { @> style="display:block !important" <@ } @>>
-        <textarea placeholder="Please enter your note here. Use this to help specify exactly what information you are trying to capture in this field."><@ if (question.note) { @><@= question.note @><@ } @></textarea>
+     <div class="note_holder" <@ if (question.get('note')) { @> style="display:block !important" <@ } @>>
+        <textarea placeholder="Please enter your note here. Use this to help specify exactly what information you are trying to capture in this field."><@ if (question.get('note')) { @><@= question.get('note') @><@ } @></textarea>
       </div>
   </li>
+  <@ }) @>
 </script>
