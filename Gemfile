@@ -37,12 +37,15 @@ group :production do
 	gem 'newrelic_rpm', "~> 3.6.1.87"
 end
 
-group :development, :test do
+group :development, :test do 
 	gem "rspec-rails", ">= 2.10.1"
 	gem "database_cleaner", ">= 0.7.2"
 	gem "email_spec", ">= 1.2.1"
 	gem 'factory_girl'
 	gem 'factory_girl_rails'
+end
+
+group :development do 
 	gem 'quiet_assets'
 	gem "bullet"
 	gem 'better_errors'
