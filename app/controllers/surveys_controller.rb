@@ -87,48 +87,6 @@ class SurveysController < ApplicationController
 
   end
 
-  def survey_results_pdf
-    #http://dev.openlayers.org/apidocs/files/OpenLayers/Feature/Vector-js.html
-
-    @survey = Survey.find(params[:id])
-
-    @entities = @survey.questions.order(:index).first.result_set
-
-    #Render the prepared JSON spec.
-    payload = render_to_string :file => 'surveys/resultpage.json'
-    
-    #Use for testing.
-    #render :text => payload
-
-    #Post the spec to our MapFish Server.
-    response = Nestful.post ENV["PRINT_SERVER_ENDPOINT"], :params => {:spec => payload}
-
-    js = JSON.parse(response)
-
-    fname = "#{@survey.id}_#{Time.now.to_i}.pdf"
-    path_to_file = js['getURL'].gsub('https://','http://')
-    realpath = ""
-    File.open(fname, 'wb') do |fo|
-      fo.print open(path_to_file).read
-      realpath = fo.path
-    end
-    #add to be deleted to queue.
-    @front_pdf = realpath
-
-    #Because we only want to show answers that reference things on the map..
-    ids = @entities.select{spresult.id}
-    @matched_results = Spresult.where{id.in(ids)}.order(:id)
-
-    prawnto :prawn => { :page_layout => :landscape}
-
-    respond_to do |format|
-      format.pdf do
-         prawnto filename: "#{@survey.slugify_title}.pdf", :inline => false
-         render "results.pdf" 
-      end
-    end   
-  end
-
   def export_blank_results
     @survey = Survey.find(params[:id])
 

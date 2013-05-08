@@ -21,15 +21,12 @@ CaerusGeo::Application.routes.draw do
   match 'surveys/:id/export_all_results_pdf', :to => 'surveys#export_all_results_pdf', :as => :survey_export_all_results_pdf, :via => :get
   match 'surveys/:id/export_geojson', :to => 'surveys#export_results_geojson', :as => :survey_export_results_geojson, :via => :get
 
-  match 'surveys/:id/results', :to => 'surveys#survey_results_pdf', :as => :survey_results_pdf, :via => :get
   match 'surveys/:id/analyze', :to => 'surveys#analyze', :as => :survey_analyze, :via => :get
   match 'surveys/:id/public', :to => 'surveys#public', :as => :survey_public, :via => :get
 
   match 'surveys/:survey_id/reports/:id/export_csv', :to => 'reports#export_csv', :as => :report_export_csv, :via => :get
   
   match 'surveys/:survey_id/reports/:id/export_geojson', :to => 'reports#export_results_geojson', :as => :report_export_results_geojson, :via => :get
-
-  match 'surveys/:survey_id/reports/:id/results', :to => 'reports#export_results_pdf', :as => :export_results_pdf, :via => :get
   
   match 'surveys/:id/print_atlas', :to => 'surveys#print_atlas', :as => :survey_print_atlas, :via => :get
   match 'surveys/:id/print_wallmap', :to => 'surveys#print_wallmap', :as => :survey_print_wallmap , :via => :get

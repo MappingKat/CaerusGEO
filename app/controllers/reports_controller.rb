@@ -215,44 +215,6 @@ class ReportsController < ApplicationController
 
   end
 
-  def export_results_pdf
-
-      @report = Report.find(params[:id])
-      #Index page map area
-      @survey = @report.survey      
-      @entities = @report.survey.questions.order(:index).first.answers_for_report(@report)
-      payload = render_to_string :file => 'surveys/resultpage.json.builder'
-
-      
-      #Use for testing.
-      #render :text => payload
-
-      #Post the spec to our MapFish Server.
-      response = Nestful.post ENV["PRINT_SERVER_ENDPOINT"], :params => {:spec => payload}
-      js = JSON.parse(response)
-
-      fname = "#{@report.survey.id}_#{Time.now.to_i}.pdf"
-      path_to_file = js['getURL'].gsub('https://','http://')
-      realpath = ""
-      File.open(fname, 'wb') do |fo|
-        fo.print open(path_to_file).read
-        realpath = fo.path
-      end
-
-      @front_pdf = realpath
-
-      #Because we only want to show answers that reference things on the map..
-      ids = @entities.select{spresult.id}
-      @matched_results = Spresult.where{id.in(ids)}.order(:id)
-      respond_to do |format|
-        format.pdf do
-           prawnto filename: "#{@survey.slugify_title}-#{@report.id}.pdf", :inline => false
-           render "results.pdf" 
-        end
-      end   
-  end
-
-
   private
 
   def fetch_survey

@@ -79,19 +79,6 @@ class Question < ActiveRecord::Base
       end
   end
 
-  def answers_for_report(report)
-      rids = report.spresults.where(:status => true)
-
-      theanswers = self.answers.joins{spresult}.where{spresult_id.in(rids.select{id})}
-      if self.form=='fillin'
-        return theanswers.count(:group => "text").each_pair{|k,v|}.map{|k,v| {:text => k,:count => v}}
-      elsif self.form=='geo_point' or self.form=='geo_circle' or self.form=='geo_polygon' or self.form=='geo_line'
-        points = theanswers.order(:spresult_id).joins{points}.includes(:points)
-        return points
-      end
-
-  end
-
   def choice_list
     #Not in use. Previously used for generating fillin choice lists serverside.
     Rails.cache.fetch([id,"choices"]) do
@@ -102,19 +89,6 @@ class Question < ActiveRecord::Base
   def wipe_caches
     #Not needed at this time.
     #Rails.cache.delete([id,"choices"])
-  end
-
-  def result_set
-
-    theanswers = self.answers.joins{spresult}.where{spresult.status == true}
-
-    if self.form=='fillin'
-      return theanswers.count(:group => "text").each_pair{|k,v|}.map{|k,v| {:text => k,:count => v}}
-    elsif self.form=='geo_point' or self.form=='geo_circle' or self.form=='geo_polygon' or self.form=='geo_line'
-      points = theanswers.order(:spresult_id).joins{points}.includes(:points)
-      return points
-    end
-
   end
 
   def min
