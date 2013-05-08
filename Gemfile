@@ -44,7 +44,7 @@ group :development, :test do
 	gem 'factory_girl'
 	gem 'factory_girl_rails'
 	gem 'quiet_assets'
-	gem "bullet", ">= 4.3.0"
-	gem 'better_errors', ">= 0.5.0"
+	gem "bullet"
+	gem 'better_errors'
 	gem 'binding_of_caller'
 end

@@ -42,7 +42,6 @@ CaerusGeo::Application.configure do
     Bullet.enable = true
     Bullet.console = true
     Bullet.rails_logger = false
-    Bullet.disable_browser_cache = true
   end
   
   config.logger = Logger.new(STDOUT)
