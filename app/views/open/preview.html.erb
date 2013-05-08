@@ -128,8 +128,6 @@ color: #83c34d;"></i> Your Survey has been published</h3>
 
 <script>
 
-var questions = new QuestionCollection(<%= raw @survey.questions.to_json %>);
-
 $(document).ready(function() {
 
   $("#next_wizard_button").click(function() {
@@ -148,20 +146,11 @@ $(document).ready(function() {
     });
   });
 
-  _.each(questions.models,function(question) {
-
-    var type = question.get('form');
-
-      if (type=='geo_point' || type=='geo_circle' || type=='geo_polygon' || type=="geo_line") {
-        var mapname = "map";
-        var osm = new L.TileLayer(osmUrl,{minZoom:0,maxZoom:18,attribution:osmAttrib,detectRetina:true});
-        var map = Open.InitMapQuestion(<%= raw @survey.area.bounds.to_json %>,question,mapname,osm);
-
-        GridServices.DrawAGrid(map,<%= raw @survey.area.grids.includes(:ne,:sw).to_json() %>,osm);
-        
-      }
-
-  });
-
+  var question = new Question(<%= raw @survey.actual_questions.first().to_json %>);
+  var mapname = "map";
+  var osm = new L.TileLayer(osmUrl,{minZoom:0,maxZoom:18,attribution:osmAttrib,detectRetina:true});
+  var map = Open.InitMapQuestion(<%= raw @survey.area.bounds.to_json %>,question,mapname,osm);
+  GridServices.DrawAGrid(map,<%= raw @survey.area.grids.includes(:ne,:sw).to_json() %>);
+  
 });
 </script>
