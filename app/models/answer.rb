@@ -6,6 +6,9 @@ class Answer < ActiveRecord::Base
   accepts_nested_attributes_for :points
   self.include_root_in_json = false
 
+  validates :spresult, :question, :presence => true
+
+
   def content
     if self.question.form.start_with?('geo')
       if question.form == 'geo_point'

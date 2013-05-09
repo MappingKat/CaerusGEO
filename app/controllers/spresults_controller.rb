@@ -98,7 +98,7 @@ class SpresultsController < ApplicationController
   def authorise_as_report_owner
      unless @report.user == current_user
         #You don't belong here. Go away.
-        render :text => "Forbidden", :status => 401
+        render :text => "Forbidden", :status => 403
      end
   end
 

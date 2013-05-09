@@ -3,6 +3,8 @@ class Spresult < ActiveRecord::Base
   attr_accessible :uid, :status
   has_many :answers, :dependent => :destroy
 
+  validates :report, :presence => true
+
   self.include_root_in_json = false
 
   after_create(:on => :create) do
