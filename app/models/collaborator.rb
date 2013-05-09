@@ -8,7 +8,7 @@ class Collaborator < ActiveRecord::Base
     collaborator.email.downcase!
   end
 
-  validates  :email, :presence => true
+  validates  :email, :survey, :presence => true
 
   self.include_root_in_json = false
 
