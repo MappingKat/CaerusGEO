@@ -41,10 +41,15 @@ class Spresult < ActiveRecord::Base
 
   def as_json(options={})
     super(:except => [:created_at,:updated_at,:report_id], 
-          :include => {:answers =>  { :include => {:points => {:except => [:id,:created_at,:updated_at,:location_type,:location_subtype,:location_id]}},
-                                      :except => [:spresult_id,:created_at,:updated_at] 
-                                    } 
-                      }
+          :include => 
+            {:answers =>  
+              { :include => 
+                {:points => 
+                  {:except => [:id,:created_at,:updated_at,:location_type,:location_subtype,:location_id]}
+                },
+                :except => [:spresult_id,:created_at,:updated_at] 
+              } 
+          }
          )
   end
 end

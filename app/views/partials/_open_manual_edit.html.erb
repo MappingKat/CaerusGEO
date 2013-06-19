@@ -1,5 +1,6 @@
 <%= render :partial => "partials/survey_finished_questions", :locals => {:open => false} %>
 <% content_for :current_page_class do %>report_edit_manual report_edit<% end %>
+<% content_for :current_body_id do %>manual_edit_section<% end %>
 
 <div class="row">
   <div class="span4">
@@ -20,23 +21,198 @@
 
 <script>
 
-window.count = <%= @report.spresults.count %>;
-window.map_form = "<%= @report.survey.map_form %>";
 <% if @report.survey.types_used.include?('datetime') %>
 window.tz_abbr = "<%= ActiveSupport::TimeZone.zones_map[@survey.time_zone].now.strftime('%Z') %>";
 <% end %>
 var questions = new QuestionCollection(<%= raw @report.survey.actual_questions.to_json %>);
+var questionJSON = questions.toJSON();
+var choice_hash = Open.GetLabelsForFields(questionJSON);
+var form_hash = Open.GetFormsForFields(questionJSON);
+var area = <%= raw @report.survey.area.bounds.to_json %>;
+var grids = <%= raw @report.survey.area.grids.includes(:ne,:sw).to_json %>;
+var full_count = <%= @report.spresults.count %>;
+var map_form = "<%= @survey.map_form %>";
 
-Spresult = Backbone.Model.extend({});
+var Spresult = Backbone.Model.extend({});
 
 var SpresultCollection = Backbone.Collection.extend({
-    model: Spresult
+  model: Spresult
 });
 
-Spresults = new SpresultCollection();
+var Spresults = new SpresultCollection();
 Spresults.url = '<%= url_for survey_report_spresults_path(@report.survey,@report) %>';
 
+var manualEditView = baseEditView.extend({
+
+  el: "#manual_edit_section",
+
+  events: {
+    'click #save_finish_button' : 'leaveEdit',
+    'click #done_with_respondent_button' : 'commitEntry',
+    'click #new_respondent_button' : 'openNewForm'
+  },
+
+  initialize: function() {
+    var self = this;
+
+    this.map = this.initMap(null, true);
+    this.handleQuestionSetup(questions, this.options.method, area, grids); // init questions
+    var thismap = form_to_nameset[map_form];
+    this.updateDrawTool(thismap);
+    this.$el.find("#save_finish_button").attr('href',"<%= url_for survey_analyze_path(@report.survey) %>");
+    
+    var entityGroup = new L.LayerGroup()
+
+    this.map.addLayer(entityGroup);
+    this.existingEntityGroup = entityGroup;
+
+    this.collection.fetch({
+      success: function (collection, response, xhr) {
+        if (collection.models.length) {
+          var existing_group = self.handleExistingManualSet(map_form, choice_hash, form_hash);
+        }
+      },
+      error: function (collection, response, options) {
+        alert('Sorry, there was an error retrieving existing entries.');
+      }
+    });
+
+  },
+
+  handleExistingManualSet: function (questionForm, choice_hash, form_hash) {
+    var self = this;
+    //Only called once.
+    this.collection.each(function (entry) {
+      Open.HandleUnifiedSet(entry, questionForm, choice_hash, form_hash, false, self.existingEntityGroup, {icon: window.green_icon}, sorted_path);
+    });
+  },
+
+  openNewForm: function(e) {
+    this.$el.find("#entry_area, #questions").fadeIn('fast');
+    this.$el.find("#done_with_respondent_button").removeClass('disabled');
+    this.$el.find("#save_indicator").hide();
+    $(e.target).hide();
+    return false
+  },
+
+  leaveEdit:  function(e) {
+    var self = this;
+    if (this.lastEntity) {
+      this.showWarning(e, self.$el.find("#done_with_respondent_button"));
+    }
+    else {
+      window.location = "<%= url_for survey_analyze_path(@report.survey) %>";
+    }
+    return false;
+  },
+
+  questionIsUnfinished: function(answer) {
+    if (!answer) {
+      return true
+    }
+    else {
+      var test = false;
+      switch (answer.form) {
+        case "fillin":
+          test = (answer.text == "")
+          break;
+        case "number": then 
+          test = (answer.number == "")
+          break;
+        case "date": then 
+          test = (answer.stamp == "")
+          break;
+        case "datetime":
+          test = (answer.stamp == "")
+          break;
+      }
+      return test
+    }
+  },
+
+  collectManualAnswers: function () {
+    var answerset = [];
+    questions.each(function(question) {
+      var form = question.get('form')
+      var jquery_obj = $("#"+question.get('id'))
+      var answer = null;
+      if (form == 'fillin') {
+        answer = {'text':jquery_obj.find('.answer').val()};
+      }
+      else if (form == 'number') {
+        answer = {'number':jquery_obj.find('.answer').val()};
+      }
+      else if (_.include(['date','datetime'], form)) {
+        answer = {'stamp':jquery_obj.find('.answer').val()}
+      }
+      else if (_.include(['geo_point','geo_polygon','geo_line'], form)) {
+
+        var entity = question.get('entity')
+        if (!entity) {
+          answer = undefined;
+        }
+        else {
+          answer = (form == 'geo_polygon' || form == 'geo_line') ? {'points': entity.getLatLngs()} : {'points': [entity.getLatLng()]};
+        }
+      }
+
+      if (answer) {
+        answer['form'] = form
+        answer['question_id'] = question.get('id');
+      }
+      answerset.push(answer);
+    });
+    return answerset
+  },
+
+  commitEntry: function(e) {
+      var self = this;
+      var answers = this.collectManualAnswers();
+      
+      var notReady = _.any(answers,function (question){
+        return self.questionIsUnfinished(question)
+      });
+
+      if (notReady) {
+        alert("You must fill in all answers for this respondent.")
+        return false;
+      }
+      
+      this.collection.create({'answers' : answers },
+        {
+          success: function(entry) {          
+            //Replace with normal entity on map;
+            self.map.removeLayer(self.lastEntity);
+            Open.HandleUnifiedSet(entry, map_form, choice_hash, form_hash, false, self.existingEntityGroup, {icon: window.green_icon}, sorted_path, true); 
+
+            self.$el.find("#this_quantity").text(self.collection.models.length + " Entries Created");
+            //clean section
+
+            self.$el.find('#questions input[type=text]').val(''); //clear fillin questions.
+            self.$el.find('#questions input[type=number]').val('');
+
+            //end clean
+            self.$el.find("#done_with_respondent_button").addClass('disabled');
+            self.$el.find("#new_respondent_button").show(); //show new respondent button;
+            self.$el.find("#save_indicator").fadeIn('fast');
+            self.$el.find(".leaflet-control-draw").fadeIn('fast'); //Bring back drawn controls
+            self.$el.find("#entry_area,#questions").fadeOut('fast');
+            self.lastEntity = undefined;
+        },
+        error:function(e) {
+          alert('Encountered an error saving.');
+        }
+      });
+      return false
+  }
+
+});
+
 $(document).ready(function() {
-  EntryServices.InitManualEntryTool('<%= url_for survey_analyze_path(@report.survey) %>',<%= raw @report.survey.area.bounds.to_json %>,<%= raw @report.survey.area.grids.includes(:ne,:sw).to_json() %>);
+  var thisEditSection = new manualEditView({
+      collection: Spresults,
+      method: 'manual',
+      model: Spresult
+    });
 });
 </script>

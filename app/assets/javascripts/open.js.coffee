@@ -42,17 +42,6 @@
 		question.set {'map':map}
 
 		return map
-	HideDrawControls: ->
-		$("#reset_area").show()
-		$(".leaflet-control-draw").hide();
-		$('.draw_control_active').removeClass('draw_control_active')
-	HandleCreatedEntity: (question,entity) ->
-		#Called after a leaflet.draw shape is created.
-		question.set {'entity':entity}
-		Open.HideDrawControls()
-		$('.leaflet-control-pointsetter').fadeIn('fast')
-		window.dirty = true
-		window.entity = entity
 	GetLabelsForFields: (questions) ->
 		choices_hash = {}
 
@@ -94,16 +83,6 @@
 			map.addControl layersControl
 			window.layer_c = layersControl
 		return map
-	QuestionIsUnfinished: (answer) ->
-		if answer is undefined
-			return true
-		else
-			switch answer.form
-				when "fillin" then test = (answer.text=="")
-				when "number" then test =  (answer.number=="")
-				when "date" then test = (answer.stamp=="")
-				when "datetime" then test = (answer.stamp=="")
-			return test
 	AddFinishedEntityGroup:(map, entityGroup,map_form) ->
 		map.addLayer(entityGroup); #Add the created entity group
 
@@ -141,12 +120,6 @@
 		for question in questions
 			hash[question.id] = question.form
 		return hash
-	HandleExistingManualSet: (collection,questionForm,choice_hash,form_hash,map) ->
-		#Called from Manual Edit.
-		entityGroup = new L.LayerGroup()
-		_.each collection.models, (entry) ->
-			Open.HandleUnifiedSet(entry,questionForm,choice_hash,form_hash,false,entityGroup,{icon:window.green_icon},sorted_path) 
-		map.addLayer entityGroup
 	InitWhiteStrip:() ->
 		$("#show_upload").click =>
 			if ($("#report_title").val()=="")
@@ -198,14 +171,17 @@
 
 		$("#survey_public").click =>
     		$('#public_save').slideDown('fast');
-	HandleUnifiedSet: (entry,questionForm,choice_hash,form_hash,prepareQueryHash,entityGroup,marker_opts,poly_opts) ->
-		set = entry.get('answers') #sorting by question id is done at DB level.
+	HandleUnifiedSet: (entry, questionForm, choice_hash, form_hash, prepareQueryHash, entityGroup, marker_opts, poly_opts, needSort) ->
+		set = entry.get('answers')
+		if needSort #new created instances need the sort.
+			set = _.sortBy set, (answer) ->
+				return parseInt(answer.question_id)
+
 		map_question = set[0] #geo is always first in open.
 		other_answers = set[1..] #get all others
-
 		if questionForm == 'geo_point'
 			point = map_question.points.pop()
-			entity = new L.Marker(new L.LatLng(point.lat,point.lng),marker_opts)
+			entity = new L.Marker [point.lat, point.lng], marker_opts
 		else if questionForm == 'geo_polygon'
 			entity = new L.Polygon map_question.points, poly_opts
 		else if questionForm == 'geo_line'
@@ -238,12 +214,12 @@
 					this_moment = moment(answer.stamp)
 					real_moment = moment(this_moment._a)
 					#refactor this.want to show survey's TZ
-					this_answer = real_moment.format('L LT')+' ' + window.tz_abbr
+					this_answer = real_moment.format('L LT') + ' ' + window.tz_abbr
 					if prepareQueryHash
 						bb_answer = real_moment.unix()
 
 
-			prepped_lines.push "<i>"+choice_hash[answer.question_id]+"</i>: " + this_answer
+			prepped_lines.push "<i>" + choice_hash[answer.question_id] + "</i>: " + this_answer
 			if prepareQueryHash
 				backbone_options_hash["Q"+answer.question_id] = bb_answer
 		if prepareQueryHash
