@@ -1,7 +1,7 @@
 require 'rbconfig'
 HOST_OS = RbConfig::CONFIG['host_os']
 source 'https://rubygems.org'
-ruby "1.9.3"
+ruby "2.0.0"
 gem 'rails', '3.2.13'
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
@@ -49,5 +49,5 @@ group :development do
 	gem 'quiet_assets'
 	gem "bullet"
 	gem 'better_errors'
-	gem 'binding_of_caller'
+	gem 'binding_of_caller', "0.7.1"
 end
