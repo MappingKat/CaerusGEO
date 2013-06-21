@@ -6,10 +6,10 @@ gem 'rails', '3.2.13'
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
-  gem 'uglifier', '>= 1.0.3'
+  gem 'uglifier', '>= 2.1.1'
 end
 gem 'jquery-rails'
-gem "pg"
+gem "pg", "0.15.1"
 gem 'jquery-ui-rails', ">= 4.0"
 gem "devise", ">= 2.2.3"
 gem "bootstrap-sass", "2.0.3.1"
@@ -19,21 +19,21 @@ gem "geocoder"
 gem "chronic", ">= 0.9.0"
 gem 'backbone-on-rails', "1.0"
 gem 'nestful'
-gem 'dalli', ">= 2.2.1"
+gem 'dalli', ">= 2.6.4"
 gem 'unicorn'
-gem 'prawn', ">= 1.0.0.rc1"
-gem "prawnto_2", :require => "prawnto"
+gem 'prawn', ">= 1.0.0.rc2"
+gem "prawnto_2", "0.2.6", :require => "prawnto"
 gem "select2-rails"
-gem 'squeel'
+gem 'squeel', "1.0.18"
 gem 'font-awesome-rails', ">= 3.0.2"
-gem 'jbuilder'
-gem 'honeybadger', ">= 1.6.2"
+gem 'jbuilder', "1.2.0"
+gem 'honeybadger', ">= 1.7"
 gem 'net-scp', "1.0.4"
 gem 'fog'
 
 group :production do
 	gem 'memcachier'
-	gem "sendgrid"
+	gem "sendgrid", "1.2.0"
 	gem 'newrelic_rpm', "~> 3.6.1.87"
 end
 
@@ -48,6 +48,6 @@ end
 group :development do 
 	gem 'quiet_assets'
 	gem "bullet"
-	gem 'better_errors'
+	gem 'better_errors', "0.9.0"
 	gem 'binding_of_caller'
 end
