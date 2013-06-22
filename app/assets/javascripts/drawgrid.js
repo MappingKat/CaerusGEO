@@ -1,3 +1,5 @@
+//Grid creation code adapted from https://github.com/codeforamerica/GridMapper-Node
+
     var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     var Grid = Backbone.Model.extend({
       defaults: {
