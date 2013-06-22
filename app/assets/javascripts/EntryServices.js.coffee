@@ -106,12 +106,9 @@
 		question.set({'entity':entity})
 		this.hideDrawControls();
 		this.$el.find('.leaflet-control-pointsetter').fadeIn('fast')
-		console.log('dsdssd')
 		if this.options.method == 'manual'
 			this.lastEntity = entity;
 		else
-			console.log('221')
-			console.log this.$el.find("#pending")
 			this.$el.find("#pending").hide();
 			this.$el.find("#ready").show();
 	hideDrawControls: () ->
