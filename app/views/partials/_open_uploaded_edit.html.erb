@@ -118,6 +118,8 @@
       this.handleQuestionSetup(this.options.questions,this.options.method,area,grids) // init questions
       this.$el.find('input.answer').attr('disabled','disabled');
 
+      this.map_question = this.options.questions.findWhere({label: "Geo Response"});
+
       //Prep drawing tool
       this.updateDrawTool(thismap);
 
@@ -266,70 +268,50 @@
       var self = this;
       //collect answers
       var thisentry = this.collection.get(self.lastIdGrabbed);
-
-      var stored_entity = null;
-      this.options.questions.each(function (question) {
-        var this_model = _.find(thisentry.get('answers'), function (answer) {
-          return (answer.question_id === question.get('id'))
-        });
-        var thisform = question.get('form');
-
-        if (_.include(['geo_point','geo_polygon','geo_line'], thisform)) {
-          var entity = question.get('entity');
-
-          if (entity) {
-            stored_entity = entity;
-            if (thisform === 'geo_point') {
-              this_model['points'] = [entity.getLatLng()];
-            }
-
-            if (_.include(['geo_polygon','geo_line'],thisform)) {
-              this_model['points'] = entity.getLatLngs();
-            }
-
-          }
-  
-        }
+      
+      var map_answer = _.find(thisentry.get('answers'), function (answer) {
+        return (answer.question_id === self.map_question.get('id'))
       });
 
-      if (this.drawInProgress) {
-        var current_model = this.collection.get(self.lastIdGrabbed); //grab fresh copy of entry.
-        current_model.save({}, {
-          success:function (e) {
+      var entity = self.map_question.get('entity');
 
-            self.drawInProgress = false;
+      map_answer.points = (map_form === 'geo_point') ? [entity.getLatLng()] : entity.getLatLngs();
+      
+      var current_model = this.collection.get(self.lastIdGrabbed); //grab fresh copy of entry.
+      current_model.save({}, {
+        success:function (e) {
+          self.drawInProgress = false;
+          self.handleGeoData(entity);
+          self.$el.find("#completed_count").text(parseInt(self.$el.find("#completed_count").text())+1);
+          self.updateProgressBar();
 
-            self.handleGeoData(stored_entity);
-            self.$el.find("#completed_count").text(parseInt(self.$el.find("#completed_count").text())+1);
-            self.updateProgressBar();
-
-            //finish
-            var id = current_model.id;
-            var current_option_element = self.$el.find('option[value="'+id+'"]'); //find current element in select2
-            var newInnerHtml = current_option_element.html().replace('remove','ok'); //change FA icon class.
-            current_option_element.html(newInnerHtml);//Change existing in old select
-            selectorMain.select2('val',id); //Update selected in view;
+          //finish
+          var id = current_model.id;
+          var current_option_element = self.$el.find('option[value="'+id+'"]'); //find current element in select2
+          var newInnerHtml = current_option_element.html().replace('remove','ok'); //change FA icon class.
+          current_option_element.html(newInnerHtml);//Change existing in old select
+          selectorMain.select2('val',id); //Update selected in view;
 
 
-            if (_.include(['geo_polygon','geo_line'], map_form)) {
-              stored_entity.editing.disable();
-              stored_entity.setStyle(sorted_path);
-            }
-            else {
-              stored_entity.setIcon(window.green_icon);
-            }
-
-            stored_entity.dragging.disable();
-
-            if (typeof callback === 'function') {
-              callback();
-            }
-          },
-          error: function (e) {
-            alert('There was an error updating this entry.')
+          if (_.include(['geo_polygon','geo_line'], map_form)) {
+            entity.editing.disable();
+            entity.setStyle(sorted_path);
           }
-        });
-      }
+          else {
+            entity.setIcon(window.green_icon);
+          }
+
+          entity.dragging.disable();
+
+          if (typeof callback === 'function') {
+            callback();
+          }
+        },
+        error: function (e) {
+          alert('There was an error updating this entry.')
+        }
+      });
+      
     },
 
     leaveEdit:  function(e) {
