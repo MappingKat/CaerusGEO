@@ -77,6 +77,9 @@ var manualEditView = baseEditView.extend({
       }
     });
 
+    this._editInProgress = true;
+    self._commitinProgress = false;
+
   },
 
   handleExistingManualSet: function (questionForm, choice_hash, form_hash) {
@@ -88,6 +91,7 @@ var manualEditView = baseEditView.extend({
   },
 
   openNewForm: function(e) {
+    this._editInProgress = true;
     this.$el.find("#entry_area, #questions").fadeIn('fast');
     this.$el.find("#done_with_respondent_button").removeClass('disabled');
     this.$el.find("#save_indicator").hide();
@@ -116,10 +120,10 @@ var manualEditView = baseEditView.extend({
         case "fillin":
           test = (answer.text == "")
           break;
-        case "number": then 
+        case "number": 
           test = (answer.number == "")
           break;
-        case "date": then 
+        case "date": 
           test = (answer.stamp == "")
           break;
         case "datetime":
@@ -134,20 +138,20 @@ var manualEditView = baseEditView.extend({
     var answerset = [];
     questions.each(function(question) {
       var form = question.get('form')
-      var jquery_obj = $("#"+question.get('id'))
+      var q_id = question.get('id');
+      var jquery_obj = $("#"+q_id)
       var answer = null;
       if (form == 'fillin') {
-        answer = {'text':jquery_obj.find('.answer').val()};
+        answer = {'text': jquery_obj.find('.answer').val()};
       }
       else if (form == 'number') {
-        answer = {'number':jquery_obj.find('.answer').val()};
+        answer = {'number': jquery_obj.find('.answer').val()};
       }
       else if (_.include(['date','datetime'], form)) {
-        answer = {'stamp':jquery_obj.find('.answer').val()}
+        answer = {'stamp': jquery_obj.find('.answer').val()}
       }
       else if (_.include(['geo_point','geo_polygon','geo_line'], form)) {
-
-        var entity = question.get('entity')
+        var entity = question.get('entity');
         if (!entity) {
           answer = undefined;
         }
@@ -157,8 +161,8 @@ var manualEditView = baseEditView.extend({
       }
 
       if (answer) {
-        answer['form'] = form
-        answer['question_id'] = question.get('id');
+        answer['form'] = form;
+        answer['question_id'] = q_id;
       }
       answerset.push(answer);
     });
@@ -167,6 +171,16 @@ var manualEditView = baseEditView.extend({
 
   commitEntry: function(e) {
       var self = this;
+
+      if (!self._editInProgress) {
+        return false;
+      }
+
+      if (self._commitinProgress) {
+        alert("A save in already in progress. Please wait.")
+        return false;
+      }
+      
       var answers = this.collectManualAnswers();
       
       var notReady = _.any(answers,function (question){
@@ -177,6 +191,8 @@ var manualEditView = baseEditView.extend({
         alert("You must fill in all answers for this respondent.")
         return false;
       }
+
+      self._commitinProgress = true;
       
       this.collection.create({'answers' : answers },
         {
@@ -188,21 +204,28 @@ var manualEditView = baseEditView.extend({
             self.$el.find("#this_quantity").text(self.collection.models.length + " Entries Created");
             //clean section
 
-            self.$el.find('#questions input[type=text]').val(''); //clear fillin questions.
-            self.$el.find('#questions input[type=number]').val('');
+            self.$el.find('#questions input[type=text], #questions input[type=number]').val(''); //clear fillin questions.
 
             //end clean
             self.$el.find("#done_with_respondent_button").addClass('disabled');
             self.$el.find("#new_respondent_button").show(); //show new respondent button;
-            self.$el.find("#save_indicator").fadeIn('fast');
+            
             self.$el.find(".leaflet-control-draw").fadeIn('fast'); //Bring back drawn controls
-            self.$el.find("#entry_area,#questions").fadeOut('fast');
+            self.$el.find("#entry_area,#questions").hide();
+            self.$el.find("#save_indicator").fadeIn('fast');
+
+            self.options.questions.findWhere({label:"Geo Response"}).set({entity:undefined});
             self.lastEntity = undefined;
+            self._commitinProgress = false;
+            self._editInProgress = false;
         },
         error:function(e) {
           alert('Encountered an error saving.');
+          self._commitinProgress = false;
+          self._editInProgress = false;
         }
       });
+
       return false
   }
 
@@ -212,7 +235,8 @@ $(document).ready(function() {
   var thisEditSection = new manualEditView({
       collection: Spresults,
       method: 'manual',
-      model: Spresult
+      model: Spresult,
+      questions: questions
     });
 });
 </script>

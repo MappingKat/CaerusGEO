@@ -2,7 +2,6 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-
 .leaflet-control-draw a {
 	background-image:asset-url('map_types_sprite.png',image)
 }
@@ -11,7 +10,7 @@
 	background-position: 3px 0 !important; width: 25px; height: 25px;
 }
 
-.leaflet-control-draw-polyline{ background-position: 3px -70px !important; width: 25px; height: 25px; } 
+.leaflet-control-draw-polyline { background-position: 3px -70px !important; width: 25px; height: 25px; } 
 .leaflet-control-draw-marker { background-position: 3px -143px !important; width: 25px; height: 25px; } 
 
 #entry_loader {
@@ -20,7 +19,6 @@
 	top: 8px;
 	color: grey;
 }
-
 
 .report_edit {
 	.draw_control_active {background-color:rgba(107, 177, 48, 0.8) !important; }
@@ -78,7 +76,7 @@
 	.chronopicker input {float:left}
 	#questions {margin-left: 0px;height:355px;margin-top: 20px;overflow-y:auto}
 	#this_quantity {font-size:15px;color:grey;font-weight:bold;width: 225px;}
-	#save_indicator {position:absolute;top:200px;position: absolute;font-size: 25px;top: 300px;margin-left: 27%;display:none;}
+	#save_indicator {margin-top:105px;font-size: 25px;margin-left: 50%;display:none;}
 
 	#done_with_respondent_button {margin-top:5px;margin-right:20px;}
 	#new_respondent_button {
