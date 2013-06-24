@@ -11,7 +11,7 @@ class User < ActiveRecord::Base
   has_many :surveys
 
   validates_inclusion_of :time_zone, in: ActiveSupport::TimeZone.zones_map(&:name)
-
+  validates_presence_of :name
   #bring in collaborators
 
   def published_survey_count
