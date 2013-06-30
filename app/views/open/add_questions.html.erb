@@ -140,11 +140,6 @@
 
       $("#next_wizard_button").click(function() {
 
-        if (ActiveQuestions.length > 15) {
-          alert('You cannot have more than 15 questions.');
-          return false;
-        }
-
         var notes = [];
         $("input.note_checkbox:checked").each(function(){notes.push($(this).parent().parent().find('textarea').val())})
         if (_.include(notes,"")){
