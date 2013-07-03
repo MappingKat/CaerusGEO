@@ -43,6 +43,11 @@ $(document).ready(function() {
   });
   window.bing = bing;
   window.green_icon = green_icon;
+
+  //ie hack
+  if ($.browser.msie && $.browser.version > 9) {
+    $('.modal').removeClass('fade');
+  }
 });
 
   var sorted_path = {
