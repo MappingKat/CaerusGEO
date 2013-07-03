@@ -1,11 +1,988 @@
+<% content_for :title do %><%= @report.survey.title %> - Edit <%= @report.title %><% end %>
 <% content_for :userbar do %>
 	<%= render :partial => "partials/white_strip", :locals => {:survey => @report.survey,:report => @report} %>
 <% end %>
+<script>
+  var form_to_nameset = {
+    "geo_point" : {
+                    entity_name :"Set Point",
+                    control_name :"Point",
+                    pending_text :"Drag point to desired location."
+                  },
+    "geo_line": { entity_name :"Set Pathway",
+                  control_name :"Pathway",
+                  pending_text :"Draw points to create pathway."
+                },
+    "geo_polygon": { entity_name :"Set Area",
+                      control_name :"Area",
+                      pending_text :"Draw points to create area."}
+  }
 
-<div class="grid-content grid-content-map">
-	<% if @report.method=="m" %>
-		<%= render :partial => "partials/open_manual_edit" %>
-	<% else %>
-		<%= render :partial => "partials/open_uploaded_edit" %>
-	<% end %>
+  var regular_path = {
+    'fillColor':'#03f',
+    'fillOpacity':0.2,
+    'color': '#03f',
+    'opacity': 0.5
+  }
+
+  var edit_style = {
+    fillColor: '#E35A49',
+    fillOpacity: 0.6
+  }
+
+  var edit_icon = new L.Icon({
+      iconUrl: '//s3.amazonaws.com/co_m_assets/marker-icon-edit.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -23],
+      shadowUrl: '//s3.amazonaws.com/co_m_assets/marker-shadow.png',
+      shadowSize: [41,41],
+      shadowAnchor: [13, 41]
+  });
+
+</script>
+<%= render :partial => "partials/survey_finished_questions" %>
+
+<div class="grid-content">
+	
+<% map_form = @report.survey.actual_questions.first.form %>
+<% content_for :current_page_class do %>report_edit_upload report_edit<% end %>
+<% content_for :current_body_id do %>uploaded_edit_section<% end %>
+
+<script id="loc_template" type="text/x-underscore-tmpl">
+    <@ _.each(points,function(point) { @>
+      <div class="well geo_well">
+        <p><span style="font-weight:bold">lat: </span><@= point.lat @></p>
+        <p><span style="font-weight:bold">lng: </span><@= point.lng @></p>
+      </div>
+    <@ }) @>
+</script>
+
+<div class="row">
+    <div class="span4">
+      <label style="width: 99%;margin-bottom:15px"><span style="font-size:14px">Choose Entry by ID</span>
+        <a class="btn btn-mini" id="create_entry" style="float:right" href="javascript:void(0);">
+          <i class="icon-plus"  title="Create New" style="font-size: 14px;"></i> New Entry</a>
+      </label>
+      <select style="width:200px;" id="entry_selector"> 
+        <option id="blank_option"></option>
+        <% @report.spresults.order(:id).each do |spresult| %>
+          <option value="<%= spresult.id %>"><%= spresult.status ? '<i class="icon-ok"></i>' : '<i class="icon-remove"></i> ' %> <%= spresult.uid || "No Entry ID" %></option>
+        <% end %>
+      </select>
+      <p id="main_loader">Loading...</p>
+      <p id="deleted">Entry has been deleted.</p>
+      <span id="dyn_area" style="display:none">
+        <span class="entry_option_icons" style="position: relative;left: 7px;">
+          <i class="icon-edit" id="edit_entry" title="Edit this entry"></i>
+          <i class="icon-trash" id="delete_entry" title="Delete this entry"></i>
+        </span>
+        <div id="editing_choices">
+          <a class="btn" id="abandonChanges">Abandon Changes</a>
+          <a class="btn btn-primary" id="saveChanges">Save Changes</a>
+        </div>
+        <div class="well" id="unique_id_section" style="display:none">
+          <label>
+            <i class="icon-question-sign" id="id_help" title="What is this?" data-toggle="popover" data-placement="top" data-content="If you collected a unique ID for this entry on your paper worksheets, enter it here so you can keep track of it in the analysis stage."></i> Entry ID <span>(optional)</span>
+          </label>
+          <input type="text" id="unique_id_field" placeholder="Entry unique ID">
+        </div>
+
+        <label class="question_label" style="margin-top:16px;">Geo Data: <span id="instructions">Please set on map.</span><span id="pending"></span>
+          <span id="location_data" style="width:125px">
+            <span id="finished_geo">Finished &nbsp;&nbsp;&nbsp;
+              <a href="javascript:void(0);" id="coords_popper">View Detail</a>
+            </span>
+            </span>
+        </label>
+
+        <div id="questions_div">
+          <ul id="questions"></ul>
+        </div>
+      </span>
+  </div>
+
+  <div class="span8">
+     <div id="map"></div>
+  </div>
+</div>
+
+
+<script>
+
+  <% if @report.survey.types_used.include?('datetime') %>
+  window.tz_abbr = "<%= ActiveSupport::TimeZone.zones_map[@survey.time_zone].now.strftime('%Z') %>";
+  <% end %>
+
+  var Spresult = Backbone.Model.extend({
+      urlRoot:"<%= url_for survey_report_spresults_path(@report.survey,@report) %>",
+      launchOn: function() {
+        this.trigger('entryLoaded', this);
+      }
+  })
+
+  var SpresultCollection = Backbone.Collection.extend({
+      model: Spresult
+  });
+
+  var Spresults = new SpresultCollection();
+
+  Spresults.url = '<%= url_for survey_report_spresults_path(@report.survey,@report) %>';
+
+  var area = <%= raw @report.survey.area.bounds.to_json %>;
+  var grids = <%= raw @report.survey.area.grids.includes(:ne,:sw).to_json %>;
+  var full_count = <%= @report.spresults.count %>;
+  var map_form = "<%= map_form %>";
+
+  var Question_mod = Backbone.Model.extend({});
+  var QuestionCollection_mod = Backbone.Collection.extend({
+    model: Question_mod
+  });
+
+  var questions = new QuestionCollection_mod(<%= raw @report.survey.actual_questions.to_json %>);
+  var questionJSON = questions.toJSON();
+  var choice_hash = Open.GetLabelsForFields(questionJSON);
+  var form_hash = Open.GetFormsForFields(questionJSON);
+
+  //modified from http://stackoverflow.com/a/10465228
+  //This is for a custom partial update of answers, an associated model.
+  var Original_BackboneSync = Backbone.sync;
+
+  Backbone.sync = function(method, model, options) {
+    if (!options.data && model && method == 'update') {
+        options.contentType = 'application/json';
+        options.data = JSON.stringify(model.payload || {});
+    }
+
+    return Original_BackboneSync.apply(this, arguments);
+  };
+
+
+  var UploadedEditSection = baseEditView.extend({
+
+    el: "#uploaded_edit_section",
+
+    events: {
+      'click #save_finish_button' : 'leaveEdit',
+      'click #delete_entry' : 'deleteEntry',
+      'click #edit_entry' : 'toggleEditMode',
+      'click #coords_popper' : 'geoClick',
+      'click #abandonChanges' : 'abandonCurrentEdit',
+      'click #saveChanges' : 'commitCurrentEdit',
+      'click #create_entry' : 'enterCreateMode',
+      'change #entry_selector' : 'selectorChange',
+      'keydown #s2id_entry_selector' : 'keyOnSelector'
+    },
+
+    defaultIcon: new L.Icon.Default,
+
+    initialize: function() {
+      var self = this;
+      this.drawInProgress = false;
+      this.map = this.initMap(null,true);
+
+      var entityGroup = new L.FeatureGroup();
+
+      this.map.addLayer(entityGroup);
+      this.existingEntityGroup = entityGroup;
+
+      //Event Bindings
+      this.listenTo(this.collection, "loadedFinishedEntry", this.loadedFinished);
+      this.listenTo(this.collection, "loadedUnfinishedEntry", this.loadedUnfinished);
+      this.listenTo(this.collection, "entryLoaded", this.entryLoad);
+      this.listenTo(this.collection, "remove", this.modelDestroyed);
+
+      this.listenTo(this.options.questions, "change:answer", this.handleAnswers);
+
+      //Prep Instructional cues
+      var thismap = form_to_nameset[map_form];
+      this.$el.find("#pending").text(thismap.pending_text);
+
+      //Prep Entry selector
+      var select2_options = {
+        placeholder: "Select a response",
+        escapeMarkup: function (m) { return m; },
+        matcher: function(term, text) { 
+          var splitter = text.split("</i>")[1];
+          return splitter.toUpperCase().indexOf(term.toUpperCase())>=0; 
+        },
+        formatNoMatches: function (term) {return "No entries."}
+      }
+      this.searchAllowed = true;
+
+      var selectorMain = this.$el.find('select');
+      if (this.$el.find("option[value!='']").length < 15) {
+        select2_options['dropdownCssClass'] = "no-search";
+        this.searchAllowed = false;
+      }
+
+      selectorMain.select2(select2_options);
+      this._select2obj = selectorMain;
+
+      //Prep questions
+      this.handleQuestionSetup(this.options.questions, area, grids); // init questions
+
+      this.map_question = this.options.questions.findWhere({label: "Geo Response"});
+
+      this.$el.find("#coords_popper").popover({
+        content: function() {return self.lastGeoData },
+        title: 'Geo coordinates',
+        placement:"right",
+        trigger: 'manual',
+        delay: { show: 0, hide: 450 }
+      })
+
+      self.collection.fetch({
+        success:function(collection) {
+          self.$el.find("#main_loader").hide();
+          if (self.collection.models.length) {
+            self.collection.each(function (entry) {          
+              if (entry.get('status')) {
+                var entity = Open.HandleUnifiedSet(entry, map_form, choice_hash, form_hash, false, self.existingEntityGroup, {}, regular_path,false, true,{entryId:entry.id});
+                entry.set({'entity':entity});
+              }
+            });
+            self.updateProgressBar();
+          }
+          // Manual setting of first entry.
+          if (selectorMain.find("option").length > 1) {
+            var firstval = parseInt(selectorMain.find("option[value!='']").first().val()); //Get the first entry. 
+            self.setEntry(firstval);
+          } else {
+            self.$el.find('.leaflet-control-draw').hide();
+            self.$el.find("#create_entry").click();
+          }
+        }
+      });
+
+      //Prep drawing tool
+      this.updateDrawTool(thismap);
+
+      //Handle clicks on finalized map entities.
+      this.existingEntityGroup.on('click', function (e) {
+        if (self._entryInEditMode) {
+          self.abandonCurrentEdit();
+        }
+        self.setEntry(e.layer.options.entryId);
+      });
+
+    },
+
+    keyOnSelector: function (e) {
+      if (!this.searchAllowed) {
+        e.preventDefault();
+      }
+    },
+
+    enterCreateMode: function () {
+      if (this.$el.find("#create_entry").attr('disabled') === 'disabled') {
+        return false;
+      }
+
+      this.abandonCurrentEdit();
+      this.$el.find("#create_entry").attr('disabled','disabled');
+
+      this.$el.find("#dyn_area").show();
+      this.unselectAllEntities();
+      this.$el.find("#unique_id_section, #editing_choices").slideDown();
+      
+      this.$el.find(".entry_option_icons").hide();
+      this.$el.find("#finished_geo").hide();
+      this._inCreateMode = true;
+      this.$el.find('input.answer')
+        .removeAttr('disabled')
+        .val('');
+      this.showNewEntityCues();
+      this.$el.find("#blank_option").text('Creating New Entry');
+      this._select2obj.select2("val", null);
+      this.$el.find('.chronopicker span').fadeIn();
+    },
+
+    unselectAllEntities: function() {
+      var self = this;
+      if (_.include(['geo_polygon','geo_line'], map_form)) {
+        self.existingEntityGroup.eachLayer(function (layer) {
+          layer.setStyle(regular_path);
+        });
+      }
+      else {
+        self.existingEntityGroup.eachLayer(function (layer) {
+          layer.setIcon(self.defaultIcon);
+        });    
+      }
+    },
+
+    setEntry: function(entryID) {      
+      this.unselectAllEntities();
+      this._select2obj.select2("val", entryID); //Set the select2box to the first one.
+      this.loadResult(entryID);  //and load it.
+      this.$el.find('#dyn_area').show();
+      this.$el.find("#unique_id_section").hide();
+    },
+
+    deleteEntry: function() {
+      var self = this;
+      var commit = confirm("Are you sure you want to delete this entry?");
+      if (commit) {
+
+        if (self._entryInEditMode) {
+          self.abandonCurrentEdit();
+        }
+
+        var entry = self.collection.get(self.lastIdGrabbed);
+        var possible_entity = entry.get('entity');
+        if (possible_entity) {
+          self.existingEntityGroup.removeLayer(possible_entity);
+        }
+        
+        entry.destroy({
+          success:function(response) {
+            $("#deleted").fadeIn('slow');
+            setTimeout(function() {
+              $("#deleted").fadeOut('fast')
+            },2000)
+          },
+          error: function(response) {
+            self.showWarning(self.$el.find('#delete_entry'),"There was an error deleting this entry.");
+          }
+        });
+        
+      }
+    },
+
+    toggleEditMode: function(e) {
+      if (this._entryInEditMode) {
+        this.abandonCurrentEdit();
+      } else {
+        this.enterEditMode();
+      }
+    },
+
+    enterEditMode: function() {
+      var self = this;
+      var entry = this.collection.get(this.lastIdGrabbed);
+      var entity = entry.get('entity');
+      this.$el.find('.chronopicker span').fadeIn();
+      if (entity) {
+          if (_.include(['geo_polygon','geo_line'], map_form)) {
+            entity.setStyle({"opacity": 0, "fillOpacity": 0});
+            if (map_form == 'geo_polygon') {
+              var newEntity = L.polygon(entity.getLatLngs(), edit_style);
+            } else {
+              var newEntity = L.polyline(entity.getLatLngs(), edit_style);
+            }
+            newEntity.addTo(this.map)
+            newEntity.dragging = new L.Handler.PolyDrag(newEntity);
+            newEntity.dragging.enable();
+
+            newEntity.editing.enable(); //enable after-the-fact vertex editing
+            //TODO: fix poly overlapping.Draw has utils to detect
+            newEntity.on('dragend', function (e) {
+              newEntity.editing.enable();
+            });
+
+            var popup = L.popup()
+              .setLatLng(thisCentroid(newEntity))
+              .setContent('You can move and adjust my points.')
+              .openOn(self.map);
+          }
+          else {
+            entity.setOpacity(0);
+            var newEntity = L.marker(entity.getLatLng(),{icon: edit_icon, draggable: true})
+              .addTo(self.map)
+              .bindPopup('You can adjust my positioning now.').openPopup();
+          }
+
+          //Needs to be brought to front.
+          
+          setTimeout(function(){
+            if (popup) {
+              self.map.closePopup(popup);
+            }
+            else {
+              newEntity.closePopup().unbindPopup();
+            }
+          }, 2000);
+
+          this.restorableEntity = entity;
+          this.editingEntity = newEntity;
+
+          this.map_question.set({entity:this.editingEntity});
+      } else {
+        //No entity yet.
+        this.showNewEntityCues();
+      }
+
+      this.$el.find('#editing_choices').slideDown('fast');
+      this.$el.find('input.answer').removeAttr('disabled');
+      this.$el.find("#edit_entry").addClass('editActive');
+      this._entryInEditMode = true;
+    },
+
+    abandonCurrentEdit: function (dontSlide) {
+      var self = this;
+      //TODO: alert if changes?
+      this.$el.find("#editing_choices, #unique_id_section").hide();
+      this.$el.find(".entry_option_icons").show();
+
+      var mapq_entity = this.map_question.get('entity');
+      if (mapq_entity) {
+        this.map.removeLayer(mapq_entity);
+      }
+
+      this.options.questions.each(function (question) {
+        self.handleAnswers(question);
+      });
+
+      if (this.restorableEntity) {
+        this.map.removeLayer(this.editingEntity);
+        
+        if (_.include(['geo_polygon','geo_line'], map_form)) {
+          this.restorableEntity.setStyle(regular_path);
+        } else {
+          this.restorableEntity.setOpacity(1);
+        }
+        this.map_question.set({'entity': this.restorableEntity});
+      
+      } else {
+        this.$el.find("#instructions").show();
+      }
+      this.drawInProgress = false;
+      this.leaveEditMode(dontSlide);
+    },
+
+    commitCurrentEdit: function (e) {
+      var self = this;
+
+      var parentControl = this.$el.find('#saveChanges');
+
+      parentControl
+          .attr('disabled','disabled')
+          .html('<i class="icon-refresh icon-spin"></i> Saving....');
+
+      var restoreControl = function() {
+        parentControl
+          .removeAttr('disabled')
+          .html('Save Changes')
+        }
+
+        if (self._commitinProgress) {
+            self.showWarning(parentControl,"A save is already in progress.");
+            restoreControl();
+            return false;
+        }
+
+        if (this._inCreateMode) {
+          var answers = this.collectManualAnswers();
+          var notReady = _.any(answers,function (question){
+            return self.questionIsUnfinished(question)
+          });
+
+          if (notReady) {
+            self.showWarning(parentControl,"Please fill in answers for all questions.");
+            restoreControl();
+            return false;
+          }
+          
+          self._commitinProgress = true;
+          this.createManualEntry(answers,function() {
+            self._commitinProgress = false;
+            self.$el.find("#pending").hide();
+            restoreControl();
+            self._inCreateMode = false;
+            self.leaveEditMode();
+          });
+
+      }
+      else {
+        var entry = this.collection.get(this.lastIdGrabbed);
+
+        if (this.getUpdatePayload(entry, true).length === 0) {
+          self.showWarning(parentControl,"You have't made any changes to this entry yet.");
+          restoreControl();
+          return;
+        }
+
+        if (this.editingEntity) {
+          this.map.removeLayer(this.editingEntity);
+        }
+
+        if (this.restorableEntity) {
+          this.map.removeLayer(this.restorableEntity);
+        }
+
+        this._entryInEditMode = false;
+        self._commitinProgress = true;
+        this.updateUploadedEntry(function() {
+          self._commitinProgress = false;
+          self.$el.find("#pending").hide();
+          restoreControl();
+          self.leaveEditMode();  //or abandon??
+        });
+      }
+
+      
+      return false;
+    },
+
+    questionIsUnfinished: function(answer) {
+      var self = this;
+      if (!answer) {
+        return true
+      }
+      else {
+        if (answer.form.substring(0,3) !== 'geo') {
+          return (answer[self._answerMap[answer.form]] == "")
+        }
+        else {
+          return false
+        }
+      }
+    },
+
+    collectManualAnswers: function () {
+      var self = this;
+      var answerset = questions.map(function (question) {
+        var form = question.get('form');
+        var q_id = question.get('id');
+        var answer = null;
+        if (_.include(['geo_point','geo_polygon','geo_line'], form)) {
+          var entity = question.get('entity');
+          if (!entity) {
+            answer = undefined;
+          }
+          else {
+            answer = (form == 'geo_polygon' || form == 'geo_line') ? {'points': entity.getLatLngs()} : {'points': [entity.getLatLng()]};
+          }
+        }
+        else {
+          answer = {};
+          answer[self._answerMap[form]] = question.get('jquery_obj').find('.answer').val();
+        }
+
+        if (answer) {
+          answer['form'] = form;
+          answer['question_id'] = q_id;
+        }
+        
+        return answer
+      });
+      return answerset
+    },
+
+    leaveEditMode: function(dontSlide) {
+      this.$el.find("#create_entry").removeAttr('disabled');
+      this.editingEntity = null;
+      this.restorableEntity = null;
+      this.$el.find('.chronopicker span').hide();
+      if (dontSlide) {
+        this.$el.find('#editing_choices').hide();
+      } else {
+        this.$el.find('#editing_choices').slideUp('fast');
+      }
+      this.$el.find(".leaflet-control-draw, #pending").hide();
+      this.$el.find('input.answer').attr('disabled','disabled');
+      this.$el.find("#edit_entry").removeClass('editActive');
+      this._entryInEditMode = false;
+      this._inCreateMode = false;
+      this.$el.find("#blank_option").empty();
+      if (this._select2obj.select2('val') == "") {
+        this._select2obj.select2('val','');
+        this.$el.find("#dyn_area").hide();
+      }
+    },
+
+    modelDestroyed: function(model,collection,options) {
+      //index avail at options.index
+      this._select2obj.select2('val', null);
+      $('option[value='+this.lastIdGrabbed+']').remove();
+      this.$el.find("#dyn_area").hide();
+      this.updateProgressBar();
+    },
+
+    geoClick: function(e) {
+      var popper = this.$el.find("#coords_popper");
+      if (!this.popped) {
+        popper.popover('show');
+        this.popped = true;
+      }
+      else {
+        popper.popover('hide');
+        this.popped = false;
+      }
+    },
+
+    closePopper: function() {
+      var popper = this.$el.find("#coords_popper");
+      popper.popover('hide');
+      this.popped = false;
+    },
+
+    handleAnswers: function(model) {
+      var self = this;
+      var form = model.get('form'),
+          answer = model.get('answer'),
+          q_id = model.get('id');
+      
+      if (answer && form.substring(0,3) !== 'geo' && !_.isNull(answer[self._answerMap[form]])) {
+          //if there an answer actually present.On first load, there isn't.
+          if (form == 'fillin') {
+            self.$el.find("#"+q_id).find('input').val(answer['text']);
+          }
+
+          else if (form == 'number') {
+            self.$el.find("#"+q_id).find('input').val(answer['number']);
+          }
+
+          else if (form == 'date') {
+            var this_answer = moment(answer['stamp']).format('L');
+            self.$el.find("#"+q_id).find('.chronopicker').datetimepicker('setValue',this_answer)
+          }
+          else if (form == 'datetime') {
+            var this_moment = moment(answer['stamp']);
+            var real_moment = moment(this_moment._a);
+            //refactor model.want to show survey's TZ
+            var this_answer = real_moment.format("MM/DD/YYYY HH:mm")
+            self.$el.find("#"+q_id).find('.chronopicker').datetimepicker('setValue', this_answer)
+          }
+      }
+
+    },
+
+    entryLoad: function(entry) {
+      var theseanswers = entry.get('answers');
+      var self = this;
+
+      this.drawInProgress = false;
+
+      _.each(theseanswers, function (answer) {
+        var question = self.options.questions.findWhere({'id':answer['question_id']});
+        question.set({'answer':answer }); //set according to this entry;
+      });
+      this.$el.find('input.answer').attr('disabled','disabled');
+      var possible_entity = entry.get('entity');
+      if (possible_entity) {
+        entry.trigger('loadedFinishedEntry', possible_entity);
+      }
+      else {
+        entry.trigger('loadedUnfinishedEntry');
+      }
+    },
+
+    loadedUnfinished: function() {
+      this.enterEditMode();
+      this.$el.find("#finished_geo").hide();
+      this.showNewEntityCues();
+    },
+
+    showNewEntityCues: function () {
+      this.$el.find(".leaflet-control-draw, #instructions").show();
+    },
+
+    loadedFinished: function (entity) {
+      this.$el.find(".entry_option_icons").show();
+      this.$el.find(".leaflet-control-draw").hide('fast'); //if its visible..get rid of the draw.Since this entry is already done.
+      this.$el.find("#instructions").hide();
+      this.handleGeoData(entity);
+      if (_.include(['geo_polygon','geo_line'], map_form)) {
+          entity.setStyle(sorted_path);
+      }
+      else {
+          entity.setIcon(window.green_icon);
+      }
+
+      var center = (map_form == 'geo_point') ? entity.getLatLng() : thisCentroid(entity);
+      this.map.panTo(center);
+    },
+
+    handleGeoData: function(entity) {
+      var points = (map_form == 'geo_point') ? [entity._latlng] : entity._latlngs;
+      var stuff = _.template($("#loc_template").html(), { points: points });
+      var popper = this.$el.find("#coords_popper");
+      //change trigger for bootstrap upgrade
+      this.lastGeoData = stuff;
+ 
+      this.$el.find("#finished_geo").show();
+    },
+
+    selectorChange: function(e) {
+      var self = this;
+      if (this.drawInProgress) {
+        self.showWarning(self.$el.find('#saveChanges'),"Please fully complete this entry first.");
+        if (!this._inCreateMode) {
+          this.$el.find('select').select2('val',this.lastIdGrabbed); //Force a switch back to previous value.
+        }
+      }
+      else {
+        if (this._entryInEditMode || this._inCreateMode) {
+          this.abandonCurrentEdit(true);
+        }
+        this.setEntry(e.val); //Load this requested answer set
+      }
+    },
+
+    updateProgressBar: function() {
+      var newCount = this.collection.where({status:true}).length;
+      var newPercent = ((newCount / this.collection.models.length) * 100) + "%";
+      this.$el.find("#completed_count").text(newCount);
+      this.$el.find('.bar').css('width', newPercent);
+      this.$el.find("#all_count").text(this.collection.models.length);
+    },
+
+    hasAnswerChanged: function (answer, testing) {
+      var self = this;
+      var question = self.options.questions.findWhere({id: answer.question_id});
+      if (question.id === self.map_question.id) {
+        var entity = (self.editingEntity) ? self.editingEntity: self.map_question.get('entity');
+        if (entity) {
+          var old_points = _.map(answer.points, function (point) { return L.latLng([point.lat,point.lng])});
+          var new_points = (map_form === 'geo_point') ? [entity.getLatLng()] : entity.getLatLngs();
+
+          var strings = _.map(old_points, function(point) { return point.toString()});
+
+          var notchanged = _.every(new_points, function(new_point) {
+            return (_.contains(strings,new_point.toString()))
+          });
+
+          if (!notchanged) {
+            if (!testing) {
+              answer.points = new_points
+            }
+            return answer;
+          }
+          else {
+            //console.log('not a new point.')
+            return
+          }
+        } else {
+          //console.log('no entity')
+          return
+        }
+        
+         
+      } else {
+        switch (question.get('form')) {
+          case 'fillin':
+            var oldAnswer = answer.text;
+            var newAnswer = question.get('jquery_obj').find('input').val();
+            if (oldAnswer !== newAnswer) {
+              if (!testing) {
+                answer.text = newAnswer
+              }
+              return answer;
+            }
+            else {
+              return;
+            }
+            break;
+          case 'number':
+            var oldAnswer = answer.number;
+            var newAnswer = parseInt(question.get('jquery_obj').find('input').val())
+            if (oldAnswer !== newAnswer) {
+              if (!testing) {
+                answer.number = newAnswer
+              }
+              return answer;
+            }
+            else {
+              return;
+            }
+            break;
+          case 'date':
+            var this_moment = moment(answer['stamp']);
+            var real_moment = moment(this_moment._a);
+            //refactor model.want to show survey's TZ
+            var oldAnswer = real_moment.format("MM/DD/YYYY");
+            var newAnswer = question.get('jquery_obj').find('input').val();
+            if (oldAnswer !== newAnswer) {
+              if (!testing) {
+                answer.stamp = newAnswer
+              }
+              return answer;
+            }
+            else {
+              return;
+            }
+            break;
+          case 'datetime':
+            var this_moment = moment(answer['stamp']);
+            var real_moment = moment(this_moment._a);
+            //refactor model.want to show survey's TZ
+            var oldAnswer = real_moment.format("MM/DD/YYYY HH:mm");
+            var newAnswer = question.get('jquery_obj').find('input').val();
+            if (oldAnswer !== newAnswer) {
+              if (!testing) {
+                answer.stamp = newAnswer
+              }
+              return answer;
+            }
+            else {
+              return;
+            }
+            break;
+        }
+      }
+    },
+
+    getUpdatePayload: function(entry,testing) {
+      var self = this;
+      var payload = _.map(entry.get('answers'),function (answer) {
+        return self.hasAnswerChanged(answer,testing);
+      });
+
+      var cleaned_payload = _.reject(payload,function(answer) { return _.isUndefined(answer)});
+      return cleaned_payload
+    },
+
+    prepEntryForCommit: function(entry) {
+      var updatePayload = this.getUpdatePayload(entry, false);
+      entry.payload = {answers: updatePayload}
+      return entry
+    },
+
+    createManualEntry: function (answers, callback) {
+      var self = this;
+      var newSpresult = {'answers' : answers };
+      newSpresult.uid = ($("#unique_id_field").val() == "") ? null : $("#unique_id_field").val();
+      
+      this.collection.create(newSpresult,
+        {
+          success: function(model,response,options) {          
+            //Replace with normal entity on map;
+            self.$el.find("#unique_id_field").val('');
+            if (self.map_question.get('entity')) {
+                self.map.removeLayer(self.map_question.get('entity')) //Kill existing entity in place
+            }
+
+            var entity = Open.HandleUnifiedSet(model, map_form, choice_hash, form_hash, false, self.existingEntityGroup, {}, regular_path, true, true, {entryId:model.id});
+            model.set({'entity':entity});
+            entity.fire('click'); //make it selected.
+            //Set Entity to selected one
+            self.handleGeoData(entity);
+            self.drawInProgress = false;
+            self.updateProgressBar();
+          
+
+          //finish
+          var id = model.id;
+          var new_option_element = $('<option value="' + id + '">yoo</option>');
+          new_option_element.text('<i class="icon-ok"></i> ' + (newSpresult.uid ? newSpresult.uid : "No Entry ID"))
+          self.$el.find('select').append(new_option_element);
+          self._select2obj.select2('val', id);
+
+          
+          if (typeof callback === 'function') {
+            callback();
+          }
+
+
+        },
+        error:function(e) {
+          self.showWarning(self.$el.find('#saveChanges'),"There was an error saving this new entry.");
+          self._commitinProgress = false;
+        }
+      });
+    },
+
+    updateUploadedEntry: function (callback) {
+      var self = this;
+      
+      //collect answers
+      var thisentry = this.collection.get(self.lastIdGrabbed);
+      var current_model = this.prepEntryForCommit(thisentry);
+
+      current_model.save({}, {
+        success:function (model, response, options) {
+          current_model.set({answers:response.answers});
+          
+          delete current_model.payload;
+
+          //Until I block save including entity, this will throw
+          if (self.map_question.get('entity')) {
+            self.map.removeLayer(self.map_question.get('entity')); //Kill existing entity in place
+          }
+
+          var map_answer = _.find(current_model.get('answers'),function(answer) {
+            return (answer.question_id === self.map_question.id)
+          });
+
+          if (map_answer.points && !_.isEmpty(map_answer.points)) {
+            //Edits don't always happen with finished geodata.
+
+            //Replace with fresh standardized one;
+            var entity = Open.HandleUnifiedSet(model, map_form, choice_hash, form_hash, false, self.existingEntityGroup, {}, regular_path, true, true, {entryId:current_model.id});
+            current_model.set({'entity':entity});
+            entity.fire('click'); //make it selected.
+            //Set Entity to selected one
+            self.handleGeoData(entity);
+            self.drawInProgress = false;
+            self.updateProgressBar();
+          }
+
+          //finish
+          var id = current_model.id;
+          var current_option_element = self.$el.find('option[value="'+id+'"]'); //find current element in select2
+          var newInnerHtml = current_option_element.html().replace('remove','ok'); //change FA icon class.
+          current_option_element.html(newInnerHtml);//Change existing in old select
+          self.$el.find('select').select2('val', id); //Update selected in view;
+
+          if (typeof callback === 'function') {
+            callback();
+          }
+        },
+        error: function (model, xhr, options) {
+          self.showWarning(self.$el.find('#saveChanges'),"There was an error updating this entry.");
+          self._commitinProgress = false;
+        }
+      });
+      
+    },
+
+    leaveEdit:  function(e) {
+      var self = this;
+      if (this.drawInProgress) {
+        self.showWarning(self.$el.find('#saveChanges'),"Please fully complete this entry first.");
+        return false;
+      }
+    },
+
+    loadResult: function (id) {
+      this.closePopper();
+      //Clean existing question data.
+      var self = this;
+
+      this.options.questions.each(function(question) {
+        question.set({'answer':null});
+        if (_.include(['geo_point','geo_circle','geo_polygon','geo_line'], question.get('form'))) {
+          var entity = question.get('entity');
+          if (entity) {
+            question.set({'entity':null});
+          }
+        }
+      });
+
+      var test_grab = Spresults.get(id);
+      if (test_grab) {
+        this.lastIdGrabbed = id;
+        test_grab.launchOn();
+      }
+
+    }
+  });
+
+
+  $(document).ready(function() {
+    $("#id_help").popover();
+    var thisEditSection = new UploadedEditSection({
+      collection: Spresults,
+      model: Spresult,
+      method: '<%= @report.method %>',
+      questions: questions
+    });
+  });
+
+</script>
+
+
+
 </div>

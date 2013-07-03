@@ -9,13 +9,18 @@ class ReportsController < ApplicationController
   before_filter :authorise_as_hybrid, :only => [:all_entries]
 
   require_dependency 'xgeoservices'
+  require 'csv'
   include ActionView::Helpers::TextHelper
 
   def update
-    #not in use
-    #@report = Report.find(params[:id])
-    #@report.update_attributes(params[:report])
-    #redirect_to survey_path(@report.survey)+"#report_history"
+    if @report.user == current_user
+      @report.update_attributes(params[:report])
+      notice = "Your survey title was updated to #{params[:report][:title]}."
+      respond_to do |format|
+        format.html { redirect_to edit_survey_report_path, :notice => notice }
+        format.json { head :no_content }
+      end
+    end
   end
 
   # GET /reports/1/edit
@@ -25,18 +30,16 @@ class ReportsController < ApplicationController
     end
   end
 
-  # DELETE /reports/1
-  # DELETE /reports/1.json
   def destroy
-    #not in use
-    #@report = Report.find(params[:id])
-    #@survey = @report.survey
-    #@report.destroy
-
-    #respond_to do |format|
-    #  format.html { redirect_to @survey }
-    #  format.json { head :no_content }
-    #end
+    if @report.user == current_user
+      @survey = @report.survey
+      @report.destroy
+      Rails.cache.delete("views/#{@report.survey.id}_rh")
+      respond_to do |format|
+        format.html { redirect_to @survey }
+        format.json { head :no_content }
+      end
+    end
   end
 
   def all_entries
@@ -143,7 +146,7 @@ class ReportsController < ApplicationController
     Rails.cache.delete("views/#{@report.survey.id}_rh")
 
     if no_uids > 0 or no_answers > 0
-      errorstring = ""
+      errorstring = String.new
       if no_uids > 0
         errorstring << "#{pluralize(no_uids,'entry')} bypassed because of missing ID. "
       end
@@ -153,10 +156,11 @@ class ReportsController < ApplicationController
     end
 
 
-    if @report.method=='u' 
+    if @report.method == 'u' 
       if @report.spresults.count == 0
+        errorstring = defined? errorstring ? errorstring : String.new
         errorstring.prepend('There were no valid entries in this upload.Please correct your source CSV file.')
-        redirect_to error_page_path,:alert => errorstring
+        redirect_to error_page_path, :alert => errorstring
       else
         if !errorstring.nil?
           errorstring << "You uploaded #{pluralize(@report.spresults.count,'entry')} successfully."

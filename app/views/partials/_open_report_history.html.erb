@@ -34,7 +34,7 @@
             <% end %>
             </td>
             <td colspan="2">
-                <a class="btn" style="margin-right:15px;margin-left:14px;float:left" href="<%= url_for edit_survey_report_path(report.survey,report) %>"><i class="icon-search"></i> View</a>
+                <a class="btn" style="margin-right:15px;float:left" href="<%= url_for edit_survey_report_path(report.survey,report) %>"><i class="icon-edit"></i> Edit Data</a>
                  <div class="dropdown" style="display:inline">
                     <a class="dropdown-toggle btn <% if report.finished_answers.count == 0 %> disabled <% end %>" id="dLabel" role="button" data-toggle="dropdown" data-target="#">
                     Exports

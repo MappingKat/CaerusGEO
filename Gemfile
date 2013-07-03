@@ -25,10 +25,10 @@ gem 'dalli', ">= 2.6.4"
 gem 'unicorn'
 gem 'prawn', ">= 1.0.0.rc2"
 gem "prawnto_2", "0.2.6", :require => "prawnto"
-gem "select2-rails"
+gem "select2-rails", "3.4.2"
 gem 'squeel', "1.0.18"
-gem 'font-awesome-rails', ">= 3.0.2"
-gem 'jbuilder', "1.2.0"
+gem 'font-awesome-rails', "3.2.1.1"
+gem 'jbuilder', "1.4.2"
 gem 'honeybadger', ">= 1.7"
 gem 'net-scp', "1.0.4"
 gem 'fog'
@@ -36,7 +36,7 @@ gem 'fog'
 group :production do
 	gem 'memcachier'
 	gem "sendgrid", "1.2.0"
-	gem 'newrelic_rpm', "~> 3.6.1.87"
+	gem 'newrelic_rpm', "~> 3.6.5.130"
 end
 
 group :development, :test do 

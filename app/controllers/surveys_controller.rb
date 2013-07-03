@@ -30,7 +30,7 @@ class SurveysController < ApplicationController
 
     csv_data = CSV.generate do |csv|
       csv << ["#{@survey.title},#{@survey.area.city},#{@survey.area.country}"]
-      main_header_row = [@survey.geo_type]
+      main_header_row = ["Entry ID", @survey.geo_type]
       @survey.field_questions.each do |question|
         main_header_row << question.label
       end

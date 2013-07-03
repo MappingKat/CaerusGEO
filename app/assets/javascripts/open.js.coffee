@@ -1,7 +1,7 @@
 @Open =
-	HandleOpenSet: (result,questionForm,entityGroup,choice_hash,form_hash) ->
+	HandleOpenSet: (result, questionForm, entityGroup, choice_hash, form_hash) ->
 		#called from Analyze.
-		return Open.HandleUnifiedSet(result,questionForm,choice_hash,form_hash,true,entityGroup) 
+		return Open.HandleUnifiedSet(result, questionForm, choice_hash, form_hash, true, entityGroup, false, false) 
 	InitFilter: (question_id) ->
 		select2_options = {placeholder: "All",allowClear: true}
 		#dont show the autocompleting search unless there are enough results
@@ -85,7 +85,11 @@
 		return map
 	AddFinishedEntityGroup:(map, entityGroup,map_form) ->
 		map.addLayer(entityGroup); #Add the created entity group
-
+		form_to_noun = {
+  		"geo_point" : "Markers",
+  		"geo_line": "Paths",
+  		"geo_polygon": "Areas"
+		}
 		window.layer_c.addOverlay(entityGroup,form_to_noun[map_form]);
 
 		#pans on map entity clicks
@@ -171,7 +175,7 @@
 
 		$("#survey_public").click =>
     		$('#public_save').slideDown('fast');
-	HandleUnifiedSet: (entry, questionForm, choice_hash, form_hash, prepareQueryHash, entityGroup, marker_opts, poly_opts, needSort) ->
+	HandleUnifiedSet: (entry, questionForm, choice_hash, form_hash, prepareQueryHash, entityGroup, marker_opts, poly_opts, needSort, includeEntryID, extra_options) ->
 		set = entry.get('answers')
 		if needSort #new created instances need the sort.
 			set = _.sortBy set, (answer) ->
@@ -180,7 +184,7 @@
 		map_question = set[0] #geo is always first in open.
 		other_answers = set[1..] #get all others
 		if questionForm == 'geo_point'
-			point = map_question.points.pop()
+			point = map_question.points[0]
 			entity = new L.Marker [point.lat, point.lng], marker_opts
 		else if questionForm == 'geo_polygon'
 			entity = new L.Polygon map_question.points, poly_opts
@@ -222,9 +226,15 @@
 			prepped_lines.push "<i>" + choice_hash[answer.question_id] + "</i>: " + this_answer
 			if prepareQueryHash
 				backbone_options_hash["Q"+answer.question_id] = bb_answer
+
+		if includeEntryID and entry.get('uid')
+			prepped_lines.push("<br>Entry ID: #{entry.get('uid')}")
+
 		if prepareQueryHash
 			entry.set backbone_options_hash
 		string = prepped_lines.join '<br>'
 		entity.bindLabel string
 		entityGroup.addLayer entity
-		return entry
+		if extra_options
+			L.Util.setOptions(entity,extra_options)
+		return entity

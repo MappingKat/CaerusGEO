@@ -4,14 +4,11 @@
 
 #homepage {
 	.navbar .nav li:hover {color:inherit !important}
-
 	#content_container {background:white;width:1050px !important;}
-	.subsection h2 {font-size:28px;color:#5a5a59;margin-bottom:9px;}
-	.subsection p {font-size:15px;color:#818486;margin-bottom:15px;}
-	#intro h2 {line-height: 28px;margin-bottom:20px;}
 	#homenav {
-	.container {width:1050px !important;background:white;height:68px;}
-	background: #F2F2F2;}
+		.container {width:1050px !important;background:white;height:68px;}
+		background: #F2F2F2;
+	}
 	$cg_green: #6BB130;
 
 	.navbar .nav .active > a {
@@ -21,8 +18,12 @@
 	}
 
 	#intro {
+		h2 {line-height: 28px;margin-bottom:20px;}
 		height:545px;width:1050px !important;
+		background:asset-url('Intro_banner.jpg',image);
+		background-repeat:no-repeat;
 		#box {
+			background:asset-url('caerusgreen.png',image);
 			h2 {margin-bottom:115px;color:white;font-size:24px;}
 			padding:20px;position:relative;width:280px;height:280px;top:20px;	
 		}
@@ -63,7 +64,10 @@
 	}
 
 	.navbar .nav li:hover {background:none}
-	.subsection {width:1050px !important;padding-top:70px;}
-	.subsection .span8 {height:420px !important;width: 570px;margin-top:55px;}
-	.subsection .span4 {padding-top:10px;padding-left: 30px;width:340px;}
+	.subsection {width:1050px !important;padding-top:70px;
+		h2 {font-size:28px;color:#5a5a59;margin-bottom:9px;}
+		p {font-size:15px;color:#818486;margin-bottom:15px;}
+		.span8 {height:420px !important;width: 570px;margin-top:55px;}
+		.span4 {padding-top:10px;padding-left: 30px;width:340px;}
+	}
 }

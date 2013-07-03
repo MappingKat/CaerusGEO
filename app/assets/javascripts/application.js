@@ -51,36 +51,11 @@ $(document).ready(function() {
     'color': '#6BB130'
   }
 
-  var regular_path = {
-    'fillColor':'#03f',
-    'fillOpacity':0.2,
-    'color': '#03f'
-  }
-
 Question = Backbone.Model.extend({});
 
 var QuestionCollection = Backbone.Collection.extend({
       model: Question
 });
-
-var form_to_noun = {
-  "geo_point" : "Markers",
-  "geo_line": "Paths",
-  "geo_polygon": "Areas"
-}
-
-var form_to_nameset = {
-  "geo_point" : {
-                  entity_name :"Set Point",
-                  control_name :"Point",
-                  pending_text :"Drag point to desired location....."},
-  "geo_line": { entity_name :"Set Pathway",
- control_name :"Pathway",
- pending_text :"Draw points to create pathway."},
-  "geo_polygon": { entity_name :"Set Area",
- control_name :"Area",
- pending_text :"Draw points to create area."}
-}
 
 function validateEmail(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

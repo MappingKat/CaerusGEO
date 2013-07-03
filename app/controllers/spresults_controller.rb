@@ -2,56 +2,74 @@ class SpresultsController < ApplicationController
 
   before_filter :authenticate_user!
   before_filter :fetch_report
-  before_filter :authorise_as_report_owner
+  before_filter :fetch_spresult, :only => [:update, :destroy]
 
+  before_filter :authorise_as_report_owner
+  before_filter :confirm_spresult_in_report, :only => [:update, :destroy]
 
 	respond_to :json
 
+  def handleAnswer(answer,input,spresult)
+      form = answer.question.form
+      if form == 'fillin' or form == 'number'
+        answer.update_attributes(input)
+      elsif form.start_with?('date')
+        #CHRONIC CANT TAKE PM, MAKE PEOPLE GIVE IN 24HR
+        Time.zone = @report.survey.time_zone
+        Chronic.time_class = Time.zone
+        parsed_chron = Chronic.parse(input['stamp'])
+        answer.stamp = parsed_chron
+      else
+        if answer.points.exists?
+          answer.points.destroy_all
+        end
+        
+        points = input['points']
+
+        points.each do |point|
+          newpoint = answer.points.build(point)
+        end
+        if spresult
+          spresult.status = true
+        end
+      end
+      answer.save
+  end
+
   def index
-  	@report = Report.find(params[:report_id])
-  	#respond_with @report.spresults.map(&:id)
-    respond_with @report.spresults.order{answers.question_id}.includes(:answers => [:points])
+    result = Rails.cache.fetch("controllers/spresult_index_#{@report.id}", :expires_in => 2.hours) do 
+      @spresults = Spresult.where(:report_id => @report).includes(:answers => [:points]).order{answers.question_id}
+      render_to_string locals: {spresults: @spresults, report: @report}
+    end
+    render :json => result
   end
 
   def show
-    @report = Report.find(params[:report_id])
     @spresult = Spresult.includes(:answers => [:points]).find(params[:id])
     respond_with @spresult
   end
 
   def update
-    @report = Report.find(params[:report_id])
-
-    @spresult = Spresult.find(params[:id])
-    #add protection that answer belongs to this spresult!
     answers = params[:answers]
 
+    available_ids = @spresult.all_answer_ids
     answers.each do |answer|
-      thisanswer = Answer.find(answer['id'])
-      if thisanswer.question.form.start_with?('geo')
-          points = answer['points']
-          points.each do |point|
-            newpoint = thisanswer.points.build(point)
-          end
-        thisanswer.save
+      if available_ids.include?(answer['id'])
+        thisanswer = Answer.find(answer['id'])
+        handleAnswer(thisanswer, answer, @spresult)
       else
-        #We don't support updating of other questions yet.those fillins are done before uploading.
-
-        #  thisanswer.update_attributes(answer)
-        thisq = Question.find(thisanswer.question.id)
-        thisq.wipe_caches()
+         render :text => "Forbidden", :status => 403
       end
-
     end
-    @spresult.status = true
+
     @spresult.save
     @report.flush() #updates report status, if we are finished.
-    respond_with @spresult
+    @spresult = Spresult.includes(:answers => [:points]).find(params[:id])
+    render :json => @spresult
   end
 
   def create
-  	@report = Report.find(params[:report_id])
-  	@spresult = @report.spresults.create(:status => true)
+  	@spresult = @report.spresults.create(:status => true, :uid => params[:uid])
 
   	answers = params[:answers]
 
@@ -59,32 +77,14 @@ class SpresultsController < ApplicationController
   		thisanswer = @spresult.answers.create()
       thisquestion = Question.find(answer['question_id'])
   		thisanswer.question = thisquestion
-      form = thisquestion.form
-  		if form=='fillin' or form=='number'
-  			thisanswer.update_attributes(answer)
-        thisanswer.question.wipe_caches()
-
-      elsif form.start_with?('date')
-        #CHRONIC CANT TAKE PM, MAKE PEOPLE GIVE IN 24HR
-        Time.zone = @report.survey.time_zone
-        Chronic.time_class = Time.zone
-        parsed_chron = Chronic.parse(answer['stamp'])
-        thisanswer.stamp = parsed_chron
-  		else
-  			points = answer['points']
-
-  			points.each do |point|
-  				newpoint = thisanswer.points.build(point)
-  			end 
-  		end
-  		thisanswer.save
-
+      handleAnswer(thisanswer, answer, nil)
   	end
 
-    respond_with(@spresult, :location => "")
+    respond_with(@spresult, :location => nil)
   end
 
   def destroy
+    respond_with(@spresult.destroy)
   end
 
   private
@@ -97,9 +97,20 @@ class SpresultsController < ApplicationController
 
   def authorise_as_report_owner
      unless @report.user == current_user
-        #You don't belong here. Go away.
         render :text => "Forbidden", :status => 403
      end
+  end
+
+  def fetch_spresult
+    @spresult = Spresult.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      render :text => "Not Found", :status => 404
+  end
+
+  def confirm_spresult_in_report
+    unless @spresult.report.id == @report.id
+        render :text => "Forbidden", :status => 403
+    end
   end
 
 

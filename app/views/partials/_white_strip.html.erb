@@ -5,40 +5,64 @@
 	<h2 id="title_line" style="font-size:26px;margin-bottom:5px;"><%= link_to(survey.title,survey) %></h2>
 	<% if defined? report %>
 		<h3 style="margin-left:0px;font-weight:bold;color:black"><%= report.title %></h3>
+
 	<% end %>
 </div>
-<div class="span5" style="float:right;margin-top:2px;">
-	<% if @current_action!='edit' %>
-	<a class="btn btn-warning" id="new_button" data-toggle="modal" href="#uploadModal">
-		<i class="icon-plus"></i> Add Data
-	</a>
-	<% elsif @current_action=='edit' and defined? report %>	
-		<table style="float:right;">
-			<tr>
-				<td style="width:220px;padding-right:20px;">
-				<% if report.method=="u" and report.unfinished_answers_count > 0 %>
-					<label class="control-label" style="font-size:15px;">
-						<span id="completed_count"><%= @report.spresults.count-@report.unfinished_answers_count %></span> of <%= pluralize(@report.spresults.count,"entries") %> with locations
-					</label>
-					<div class="progress progress-striped progress-success">
-	 					<div class="bar" style="width: 0%;"></div>
-					</div>
-				<% end %>
-				</td>
-				<td style="vertical-align: middle;">
-					<% if report.method=='u' and report.unfinished_answers_count == 0 %>
-					<a class="btn" id="save_finish_button">Back</a>
-					<% else %>
-					<a class="btn btn-success" id="save_finish_button">Finish</a>
-					<% end %>
-				</td>
-			</tr>
-		</table>
+<div class="span5">
+	<% if @current_action != 'edit' %>
+	<div class="row">
+		<div class="span2 offset3">
+			<a class="btn btn-warning" id="new_button" data-toggle="modal" href="#uploadModal">
+				<i class="icon-plus"></i> Add Data
+			</a>
+		</div>
+	</div>
+	<% elsif @current_action == 'edit' %>	
+	<div class="row">
+		<div class="span3">
+			<% if report.method == "m" %>
+				<label class="control-label" style="font-size:15px;">
+					<span id="completed_count"><%= @report.spresults.count %></span> finished
+				</label>
+			<% else %>
+				<label class="control-label" style="font-size:15px;">
+					<span id="completed_count"><%= @report.spresults.count-@report.unfinished_answers_count %></span> of <span id="all_count"><%= report.spresults.count %></span> finished
+				</label>
+				<div class="progress progress-striped progress-success">
+ 					<div class="bar" style="width: 0%;"></div>
+				</div>
+			<% end %>
+		</div>
+		<div class="span2" id="edit_buttons_span">
+			<a class="btn" id="save_finish_button" href="<%= survey_path(@survey) %>#rh">Back to Reports</a>
+			<a class="btn btn-success" href="<%= survey_analyze_path(@survey) %>" style="margin-top:10px">Visualize Results</a>
+			<p id="report_options"><a data-toggle="modal" href="#reportModal">Report Options</a></span>
+		</div>
+	</div>
+
+
+	<div id="reportModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="reportLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h2 id="reportLabel">Edit this report</h2>
+  </div>
+  <div class="modal-body">
+		<%= form_for report, url: {action: "update"} do |f| %>
+			<%= f.text_field :title , :style => "float: left;margin-right: 15px;" %>
+		<%= f.submit "Save Report Title",  :class => "btn" %>
+		<% end %>
+		<hr>
+		<%= link_to "Delete this report", survey_report_path(@report.survey, @report), :method => :delete, :confirm => "Are you sure you want to delete this report, and all its entries?", :class => 'btn btn-danger' %>
+		<a class="btn" style="float:right" data-dismiss="modal" aria-hidden="true">Close</a>
+  </div>
+</div>
+
+
 	<% end %>
 </div>
 
 <div class="clear"></div>
-
+<% if @current_action != 'edit' %>
 <div id="overview_collapsible" <% if request.query_string !="firstview" %> style="display:none" <% end %> >
 	<div class="span4" style="margin-left: 0px;">
 		<div id="so_map"></div>
@@ -66,6 +90,9 @@
 	</div>
 
 </div>
+
+<% end %>
+
 <% ext_links = (@current_action == 'analyze' or @current_controller=='reports') %>
 <div class="clear" style="height:40px"></div>
 
@@ -110,7 +137,7 @@
 		  <a href="#" style="float:right" id="flip"><%= request.query_string !="firstview" ? '<i class="icon-chevron-down"></i><span>Show Details</span>'.html_safe : '<i class="icon-chevron-up"></i><span>Hide Details</span>'.html_safe %></a>
 
 		</ul>
-<% end %>
+
 
 <div id="uploadModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="uploadLabel" aria-hidden="true">
   <div class="modal-header">
@@ -119,7 +146,7 @@
   </div>
   <div class="modal-body">
   		<p>
-  			<input type="text" id="report_title" placeholder="Enter Report Name" style="font-size:15px">
+  			<input type="text" id="report_title" placeholder="Enter Report Title" style="font-size:15px">
   		</p>
   		<h4 style="margin-bottom:15px;">Choose an entry method</h4>
   		<div id="step1_report">
@@ -142,6 +169,7 @@
 	<%= submit_tag "Upload & Import", :class => "btn-success btn", :id => "manual_form" %>
 <% end %>
 </div>
+<% end %>
 
 <script>
 $(document).ready(function() {

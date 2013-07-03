@@ -2,64 +2,70 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-.leaflet-control-draw a {
-	background-image:asset-url('map_types_sprite.png',image)
-}
-
-.leaflet-control-draw-polygon {
-	background-position: 3px 0 !important; width: 25px; height: 25px;
-}
-
-.leaflet-control-draw-polyline { background-position: 3px -70px !important; width: 25px; height: 25px; } 
-.leaflet-control-draw-marker { background-position: 3px -143px !important; width: 25px; height: 25px; } 
-
-#entry_loader {
-	display:none;position: relative;
-	left: 10px;
-	top: 8px;
-	color: grey;
-}
-
+#save_finish_button {width:101px !important};
+.geo_well {margin-bottom: 0px;}
+#report_options {font-size:12px;text-decoration:underline;position:absolute;margin-top:18px;width:123px;text-align: center}
 .report_edit {
+	.leaflet-control-draw a {
+	background-image:asset-url('map_types_sprite.png',image)
+	}
+
+	.leaflet-control-draw-polygon {
+		background-position: 3px 0 !important; width: 25px; height: 25px;
+	}
+
+	.leaflet-control-draw-polyline { background-position: 3px -70px !important; width: 25px; height: 25px; } 
+	.leaflet-control-draw-marker { background-position: 3px -143px !important; width: 25px; height: 25px; } 
+
+	#edit_buttons_span {
+		text-align: right;position: relative;top: 3px;
+		.btn {font-size:14px;width:115px}
+	}
+
+	.entry_option_icons {
+		i {
+			&:hover {color: #E35A49}
+			cursor:pointer;
+			font-size: 20px;position: relative;top: 3px;left: 10px;margin-right:10px
+		}
+		#edit_entry {top: 5px;}
+		.editActive {color: #E35A49}
+
+	}
+	#unique_id_field {width:40%;margin-bottom:0px}
 	.draw_control_active {background-color:rgba(107, 177, 48, 0.8) !important; }
 	div.leaflet-control-draw {position: absolute;left:0px}
 	
-
 	.leaflet-control-draw a {
 		&:hover {background-color: #fff !important}
 		p {padding-left: 28px; font-size: 14px; color: black; position: relative; top: 3px;}
 		height:26px;width:135px;text-decoration: none;background-color: rgba(255, 255, 255, 0.90); 
 	}
-		.span8 {margin-left: 0px;width:640px}
+	#editing_choices {
+		margin-top:15px;display:none;
+		#abandonChanges {margin-right:20px;}
+	}
+	#coords_popper {font-size:12px;text-decoration:underline}
+	#unique_id_section {
+		label {
+			i {font-size:16px}
+			span {font-style:italic}
+			float:left;margin-top:5px;margin-right:20px;
+		}
+		padding:5px 10px !important;margin-top:10px;width:89%;
+	}
 
-		.span8 #map {height:520px;width:663px}
+	.span8 {
+		margin-left: 0px;width:640px;
+		#map {height:520px;width:663px}
+	}
 
-}
-
-.report_edit_upload {
 	#questions li {margin-bottom:10px; }
 	.question_label {font-size:14px;font-weight:bold;clear:both }
-	.chronopicker .add-on {display:none}
-	.leaflet-control-pointsetter {
-		cursor:pointer;
-		text-align:center;
-		font-size:14px;
-		box-shadow: 0 0 8px rgba(0,0,0,0.4);
-		border: 1px solid #4D8A4D;
-		-webkit-border-radius: 5px;
-		border-radius: 5px;
-		background-color: rgba(183, 217, 139, 1);
-		a {
-			color:#4D8A4D; 
-			font-weight: bold; 
-			text-decoration: none; 
-			padding:6px 21px;
-			display:block;
-		}
-	}
 	#instructions {color:red;font-weight:bold;display:none}
-	#pending, #ready {display:none}
-
+	#pending {display:none}
+	#main_loader {text-align:center}
+	#deleted {text-align:center;display:none;margin-top:20px}
 	.row .span4 {padding-bottom:15px;padding-top:20px;}
 
 	#questions_div {
@@ -67,20 +73,5 @@
 		#questions {margin-left:0px;}
 	}
 
-	.input-prepend .add-on, .input-prepend .btn {margin-right: -5px; }
-
-}
-.report_edit_manual {
-	#map {height:400px;width:100%}
-	.span4 {padding-top:15px}
-	.chronopicker input {float:left}
-	#questions {margin-left: 0px;height:355px;margin-top: 20px;overflow-y:auto}
-	#this_quantity {font-size:15px;color:grey;font-weight:bold;width: 225px;}
-	#save_indicator {margin-top:105px;font-size: 25px;margin-left: 50%;display:none;}
-
-	#done_with_respondent_button {margin-top:5px;margin-right:20px;}
-	#new_respondent_button {
-		i {margin-right:5px}
-		display:none;margin-top:5px;
-	}
+	.add-on {position: relative;left: -4px;}
 }

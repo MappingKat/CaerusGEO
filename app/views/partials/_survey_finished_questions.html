@@ -12,7 +12,7 @@
 <script id="fillin_template" type="text/x-underscore-tmpl">
   <li id="<@= id @>">
     <@= _.template($("#labelnote_template").html(),{'label':label, note:note}) @>
-    <input type="text" class="answer" placeholder="Enter text">
+    <input type="text" class="answer" placeholder="Enter text" spellcheck="false">
   </li>
 </script>
 
@@ -33,7 +33,7 @@
   <li id="<@= id @>">
     <@= _.template($("#labelnote_template").html(),{'label':label, note:note}) @>
     <div class="chronopicker combo input-append">
-      <input data-format="MM/dd/yyyy hh:mm:ss" type="text" class="answer"></input>
+      <input data-format="MM/dd/yyyy hh:mm" type="text" class="answer" placeholder="Use the Calendar button"></input>
       <span class="add-on">
         <i data-time-icon="icon-time" data-date-icon="icon-calendar">
         </i>

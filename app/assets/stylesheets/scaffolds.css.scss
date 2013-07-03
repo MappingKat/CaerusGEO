@@ -111,23 +111,9 @@ body {
 
 /* @group Survey Editing */
 
-.survey-map{
-	float: right;
-	width: 620px; /*600*/
-	height: 490px; /*450*/
-	margin-top: -16px;
-}
-
-
-.survey-upload form{ margin: 0px;}
-
 #new_button {
 	float: right;
 }
-
-
-
-/* @end */
 
 /* @end */
 
@@ -193,31 +179,17 @@ body {
 
 /* @end */
 
-/* @group Survey Index */
-
-#survey-all-tables{
-	width: 100%;
+#footer { 
+  background:white;color:silver;padding-bottom:20px;padding-top:20px;
+  #last_line {margin: 0 0 9px 25px;}
+  ul {margin-bottom:5px !important};
+  a {color:silver};
+  .inline li  {
+    font-size:15px;display:inline;margin:0px 10px;color:silver
+  }
 }
 
-#survey-index-bar #survey-nav{
-	display: none;
-}
-
-/* @end */
-
-.report-preview{
-	padding: 10px;
-}
-
-/* @end */
-
-#footer { background:white;color:silver;padding-bottom:20px;padding-top:20px;}
-#footer #last_line {margin: 0 0 9px 25px;}
-#footer ul {margin-bottom:5px !important}
-#footer .inline li  {font-size:15px;display:inline;margin:0px 10px;color:silver}
 #footer .inline li:first-child {margin-left:0px;}
-
-#footer a {color:silver}
 
 #user_index .copy {padding-top:7px;margin-bottom:0px}
 #user_index {padding-top:26px;padding-left:20px;}
@@ -228,20 +200,14 @@ body {
 	width: 220px;padding:0px;background-repeat: no-repeat;height:220px;
 	background-size:100%;
 }
-#user_index .thumbnail .copy {background:white;
-padding-left:15px;padding-right:5px;
-color:black;}
+#user_index .thumbnail .copy {background:white; padding-left:15px;padding-right:5px; color:black;} 
 #user_index .thumbnail h3 {font-weight:normal;font-size:16px}
 #user_index .thumbnails a {	text-decoration: none !important}
-#user_index .thumbnail:hover {outline: thick solid #83c34d;
-outline-offset: -3px;
-
-}
+#user_index .thumbnail:hover {outline: thick solid #83c34d;outline-offset: -3px;}
 
 #user_index .thumbnail:hover > .copy {background:#83c34d;color:white}
 #user_index .thumbnail:hover > .copy > .updated_status {color:white !important}
 #user_index .updated_status {font-size:11px;position: relative;top: -5px;color:#888888;}
-
 
 /* whitestrip */
 #so_map {width:100%;height:225px;border:2px solid black}
@@ -250,17 +216,9 @@ dt {text-align: left !important;font-weight: normal; color: #000000; font-size: 
 dd {font-weight: bold; font-size: 14px; color: #919191;margin-bottom:15px;}
 #flip {text-decoration: none !important; cursor:pointer; color:black; position:relative; top:10px; font-size:12px; } 
 #flip span {padding-left:5px;}
-#newresults {width: 132px;float:right}
-#newresults #new_button {font-size:14px;}
-#newresults .icon-plus {margin-right:5px;line-height: 1.2em;}
-#save_finish_button {font-size:14px;width:100px;}
+
 #title_line {margin-bottom:18px;line-height:24px;}
 .unshown_input {display:none;}
 
-.top_header {
-	color:#595A58;font-size:22px;font-weight: normal;line-height: 27px;
-}
-
-.lower_header {
-	color:gray;
-}
+.top_header {color:#595A58;font-size:22px;font-weight: normal;line-height: 27px; }
+.lower_header {color:gray;}
