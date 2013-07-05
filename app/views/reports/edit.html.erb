@@ -204,6 +204,7 @@
         escapeMarkup: function (m) { return m; },
         matcher: function(term, text) { 
           var splitter = text.split("</i>")[1];
+          if (!splitter) {return false}
           return splitter.toUpperCase().indexOf(term.toUpperCase())>=0; 
         },
         formatNoMatches: function (term) {return "No entries."},
