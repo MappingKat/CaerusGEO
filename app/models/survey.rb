@@ -26,11 +26,15 @@ class Survey < ActiveRecord::Base
   end
 
   def postSpec(spec)
-      #Post the spec to our MapFish Server.
-      response = Nestful.post ENV["PRINT_SERVER_ENDPOINT"], :params => {:spec => spec}
-
-      #MapFish passes back the url of the PDF.We then redirect to that.
-      js = JSON.parse(response)
+      #Post the spec to our MapFish Server.3 retries allowed.
+      connection = Excon.new(ENV["PRINT_SERVER_ENDPOINT"])
+      connection.request(:idempotent => true)
+      response = connection.post(
+        :body => URI.encode_www_form("spec" => spec),
+        :headers => { "Content-Type" => "application/x-www-form-urlencoded" }
+      )
+      #MapFish passes back the url of the PDF.
+      js = JSON.parse(response.body)
       return js['getURL']
   end
 

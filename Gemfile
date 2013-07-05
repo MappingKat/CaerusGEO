@@ -20,7 +20,7 @@ gem "wicked", ">= 0.4.0"
 gem "geocoder"
 gem "chronic", ">= 0.9.0"
 gem 'backbone-on-rails', "1.0"
-gem 'nestful'
+gem 'excon'
 gem 'dalli', ">= 2.6.4"
 gem 'unicorn'
 gem 'prawn', ">= 1.0.0.rc2"
