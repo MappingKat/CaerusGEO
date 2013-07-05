@@ -206,7 +206,10 @@
           var splitter = text.split("</i>")[1];
           return splitter.toUpperCase().indexOf(term.toUpperCase())>=0; 
         },
-        formatNoMatches: function (term) {return "No entries."}
+        formatNoMatches: function (term) {return "No entries."},
+        formatResult: function (result) {
+          return result.text;
+        }
       }
       this.searchAllowed = true;
 
