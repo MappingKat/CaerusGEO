@@ -869,7 +869,7 @@
 
           //finish
           var id = model.id;
-          var new_option_element = $('<option value="' + id + '">yoo</option>');
+          var new_option_element = $('<option value="' + id + '"></option>');
           new_option_element.text('<i class="icon-ok"></i> ' + (newSpresult.uid ? newSpresult.uid : "No Entry ID"))
           self.$el.find('select').append(new_option_element);
           self._select2obj.select2('val', id);
